@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.*;
 
 @Slf4j
 @Service
@@ -38,11 +37,19 @@ public class BookingTicketRenderService {
         // 2. Build HTML String
         String html = templateEngine.process("booking_ticket", context);
 
+        InputStream fontStream = getClass().getClassLoader().getResourceAsStream("fonts/arial.ttf");
+
+        if (fontStream == null) {
+            throw new IOException("Không tìm thấy file font trong resources/fonts/arial.ttf");
+        }
+
+        byte[] fontBytes = fontStream.readAllBytes();
+
         // 3. Render ra mảng Byte PDF
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
-            builder.useFont(new File(getClass().getClassLoader().getResource("fonts/arial.ttf").toURI()), "Arial");
+            builder.useFont(() -> new ByteArrayInputStream(fontBytes), "Arial");
             builder.withHtmlContent(html, null);
             builder.toStream(os);
             builder.run();
