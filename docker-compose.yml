@@ -21,6 +21,7 @@ services:
     depends_on:
       - service-a
       - service-b
+      - service-c
     networks:
       - app-network
 
@@ -44,6 +45,16 @@ services:
     build: ./services/service-b
     ports:
       - "${SERVICE_B_PORT:-5002}:5000"
+    env_file:
+      - .env
+    networks:
+      - app-network
+
+  # ─── Service C ───────────────────────────────────
+  service-c:
+    build: ./services/service-c
+    ports:
+      - "${SERVICE_C_PORT:-5003}:5000"
     env_file:
       - .env
     networks:
