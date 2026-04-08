@@ -33,6 +33,7 @@ public class SlotBlock {
     private TourSchedule tourSchedule;
 
     @Column(name = "customer_id")
+    @JdbcTypeCode(Types.VARCHAR)
     private UUID customerId;
 
     @Column(name = "quantity", nullable = false)
@@ -46,6 +47,7 @@ public class SlotBlock {
     private LocalDateTime expiresAt;
 
     @Column(name = "booking_id")
+    @JdbcTypeCode(Types.VARCHAR)
     private UUID bookingId;
 
     @Column(name = "created_at", insertable = false, updatable = false)
@@ -54,7 +56,6 @@ public class SlotBlock {
     public enum SlotBlockStatus {
         PENDING,   // Đang giữ chỗ, chờ thanh toán
         CONFIRMED, // Đã thanh toán thành công, chốt vé
-        RELEASED,  // Khách chủ động hủy hoặc admin nhả vé
         EXPIRED    // Hết thời gian giữ chỗ (vd: quá 15 phút), hệ thống tự động nhả vé
     }
 }

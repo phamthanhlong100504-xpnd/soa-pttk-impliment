@@ -67,7 +67,6 @@ public class InventoryHistory {
     // Enum định nghĩa các loại giao dịch
     public enum ActionType {
         BLOCK,
-        RELEASE,
         CONFIRM,
         EXPIRE,
         ADJUST,
