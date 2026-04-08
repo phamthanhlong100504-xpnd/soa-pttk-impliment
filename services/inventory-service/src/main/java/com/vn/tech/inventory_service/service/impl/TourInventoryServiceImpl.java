@@ -2,6 +2,7 @@ package com.vn.tech.inventory_service.service.impl;
 
 import com.vn.tech.inventory_service.dto.response.AvailableResponse;
 import com.vn.tech.inventory_service.dto.response.SlotBlockResponse;
+import com.vn.tech.inventory_service.dto.response.UpdateSlotBlockResponse;
 import com.vn.tech.inventory_service.model.Inventory;
 import com.vn.tech.inventory_service.model.InventoryHistory;
 import com.vn.tech.inventory_service.model.SlotBlock;
@@ -97,6 +98,49 @@ public class TourInventoryServiceImpl implements TourInventoryService {
             .build();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UpdateSlotBlockResponse updateSlotBlock(UUID tourScheduleId, String customerId) {
+
+        // Lọc theo customerId, tourScheduleId và status
+        SlotBlock slotBlock = slotBlockRepository.findByTourScheduleIdAndCustomerIdAndStatus(
+            tourScheduleId,
+            UUID.fromString(customerId),
+            SlotBlock.SlotBlockStatus.PENDING
+        ).orElseThrow(() -> new IllegalArgumentException("Giữ chỗ đã hết hạn hoặc không tồn tại đối với khách hàng này."));
+
+        Integer amount = slotBlock.getQuantity();
+
+        slotBlock.setStatus(SlotBlock.SlotBlockStatus.CONFIRMED);
+        slotBlockRepository.save(slotBlock);
+
+        // cập nhật tồn kho
+        Inventory inventory = inventoryRepository.findById(tourScheduleId)
+            .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy kho vé cho Lịch trình: " + tourScheduleId));
+
+        inventory.setBlockedSlots(inventory.getBlockedSlots() - amount);
+        inventory.setConfirmedSlots(inventory.getConfirmedSlots() + amount);
+
+        inventoryRepository.save(inventory);
+
+        Integer currentAvailable = inventory.getTotalSlots() - inventory.getBlockedSlots() - inventory.getConfirmedSlots();
+
+        InventoryHistory history = createConfirmInventoryHistory(
+            customerId,
+            tourScheduleId,
+            amount,
+            currentAvailable,
+            slotBlock.getBookingId().toString()
+        );
+        inventoryHistoryRepository.save(history);
+
+        return UpdateSlotBlockResponse.builder()
+            .actionType("CONFIRMED")
+            .confirmedSlots(amount)
+            .bookingId(slotBlock.getBookingId().toString())
+            .build();
+    }
+
     public SlotBlock createSlotBlockEntity(UUID tourScheduleId, String customerId, Integer amount, String bookingId) {
         TourSchedule tourScheduleProxy = tourScheduleRepository.getReferenceById(tourScheduleId);
         return SlotBlock.builder()
@@ -116,12 +160,30 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         return InventoryHistory.builder()
             .createdAt(Instant.now())
             .actor(customerId)
-            .note("")
+            .note("Khách hàng đã đặt trước vé thành công! Chờ thanh toán")
             .actionType(InventoryHistory.ActionType.BLOCK)
             .inventory(inventoryProxy)
             .quantityChanged(amount)
             .previousAvailableSlots(previousAvailableSlots)
             .newAvailableSlots(newAvailableSlots)
+            .build();
+    }
+
+
+    public InventoryHistory createConfirmInventoryHistory(String customerId, UUID tourScheduleId, Integer amount, Integer currentAvailableSlots, String bookingId) {
+
+        // Dùng Proxy để tăng tốc độ, không bắn lệnh SELECT
+        Inventory inventoryProxy = inventoryRepository.getReferenceById(tourScheduleId);
+
+        return InventoryHistory.builder()
+            .inventory(inventoryProxy)
+            .actionType(InventoryHistory.ActionType.CONFIRM) // Cần khai báo thêm CONFIRM trong Enum của bạn
+            .quantityChanged(amount)
+            .previousAvailableSlots(currentAvailableSlots)
+            .newAvailableSlots(currentAvailableSlots) // Không thay đổi
+            .actor(customerId)
+            .referenceId(bookingId) // Ghi lại mã Booking để tra cứu chéo
+            .note("Khách hàng đã thanh toán và chốt vé thành công")
             .build();
     }
 

@@ -1,13 +1,9 @@
 package com.vn.tech.inventory_service.controller;
 
-import com.vn.tech.inventory_service.dto.request.AvailableRequest;
 import com.vn.tech.inventory_service.dto.request.SlotBlockRequest;
-import com.vn.tech.inventory_service.dto.response.ApiResponse;
-import com.vn.tech.inventory_service.dto.response.AvailableResponse;
-import com.vn.tech.inventory_service.dto.response.SlotBlockResponse;
-import com.vn.tech.inventory_service.dto.response.SuccessResponse;
+import com.vn.tech.inventory_service.dto.request.UpdateSlotBlockRequest;
+import com.vn.tech.inventory_service.dto.response.*;
 import com.vn.tech.inventory_service.service.TourInventoryService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,4 +42,18 @@ public class TourInventoryController {
         return new SuccessResponse(response, "Success! Tạo slot-blocks thành công");
 
     }
+
+    @PutMapping("/slots-blocks")
+    public ApiResponse updateSlotsBlocks(@RequestBody UpdateSlotBlockRequest request) {
+        log.info("[Inventory Service] [TourInventoryController] Thực hiện cập nhật slot-blocks giúp giữ chỗ; tourScheduleId : {}, customerId : {}",
+            request.getTourScheduleId(),request.getCustomerId());
+
+        UpdateSlotBlockResponse response = tourInventoryService.updateSlotBlock(request.getTourScheduleId(),request.getCustomerId());
+
+        return new SuccessResponse(response, "Success! Cập nhật slot-blocks thành công");
+
+    }
+
+
+
 }
