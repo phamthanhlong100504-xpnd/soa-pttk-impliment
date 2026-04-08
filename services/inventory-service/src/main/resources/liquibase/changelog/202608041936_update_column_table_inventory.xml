@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="20260408-004-fix-inventory-history" author="LongPT">
+    <preConditions onFail="MARK_RAN">
+      <columnExists tableName="inventory_history" columnName="action"/>
+    </preConditions>
+
+    <renameColumn tableName="inventory_history" oldColumnName="action" newColumnName="action_type" columnDataType="VARCHAR(50)"/>
+    <renameColumn tableName="inventory_history" oldColumnName="quantity" newColumnName="quantity_changed" columnDataType="INT"/>
+    <renameColumn tableName="inventory_history" oldColumnName="previous_available" newColumnName="previous_available_slots" columnDataType="INT"/>
+    <renameColumn tableName="inventory_history" oldColumnName="new_available" newColumnName="new_available_slots" columnDataType="INT"/>
+
+    <addColumn tableName="inventory_history">
+      <column name="actor" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="note" type="VARCHAR(255)"/>
+    </addColumn>
+  </changeSet>
+
+</databaseChangeLog>
