@@ -83,7 +83,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
 
         // Tạo SlotBlocks
         SlotBlock slotBlock = createSlotBlockEntity(tourScheduleId,customerId,amount,bookingId);
-        slotBlockRepository.save(slotBlock);
+        SlotBlock saveSlotBlock = slotBlockRepository.save(slotBlock);
 
         log.info("[Inventory] [TourInventoryServiceImpl] Tạo một slotblock thành công");
 
@@ -100,20 +100,24 @@ public class TourInventoryServiceImpl implements TourInventoryService {
             .actionType("PENDING")
             .newAvailableSlots(newAvailableSlots)
             .previousAvailableSlots(previousAvailableSlots)
+            .slotBlockId(saveSlotBlock.getId())
             .amount(amount)
             .build();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UpdateSlotBlockResponse updateSlotBlock(UUID tourScheduleId, String customerId) {
+    public UpdateSlotBlockResponse updateSlotBlock(UUID tourScheduleId, String customerId , UUID slotBlockId) {
 
         // Lọc theo customerId, tourScheduleId và status
-        SlotBlock slotBlock = slotBlockRepository.findByTourScheduleIdAndCustomerIdAndStatus(
-            tourScheduleId,
-            UUID.fromString(customerId),
-            SlotBlock.SlotBlockStatus.PENDING
-        ).orElseThrow(() -> new IllegalArgumentException("Giữ chỗ đã hết hạn hoặc không tồn tại đối với khách hàng này."));
+//        SlotBlock slotBlock = slotBlockRepository.findByTourScheduleIdAndCustomerIdAndStatus(
+//            tourScheduleId,
+//            UUID.fromString(customerId),
+//            SlotBlock.SlotBlockStatus.PENDING
+//        ).orElseThrow(() -> new IllegalArgumentException("Giữ chỗ đã hết hạn hoặc không tồn tại đối với khách hàng này."));
+
+        SlotBlock slotBlock = slotBlockRepository.findById(slotBlockId)
+            .orElseThrow(() -> new IllegalArgumentException("Giữ chỗ đã hết hạn hoặc không tồn tại đối với khách hàng này."));
 
         Integer amount = slotBlock.getQuantity();
 

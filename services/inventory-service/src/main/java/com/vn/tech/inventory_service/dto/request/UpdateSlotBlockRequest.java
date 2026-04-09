@@ -9,4 +9,5 @@ public class UpdateSlotBlockRequest
 {
     private UUID tourScheduleId;
     private String customerId;
+    private UUID slotBlockId;
 }

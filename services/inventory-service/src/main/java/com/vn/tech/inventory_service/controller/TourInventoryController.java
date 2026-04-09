@@ -48,7 +48,7 @@ public class TourInventoryController {
         log.info("[Inventory Service] [TourInventoryController] Thực hiện cập nhật slot-blocks giúp giữ chỗ; tourScheduleId : {}, customerId : {}",
             request.getTourScheduleId(),request.getCustomerId());
 
-        UpdateSlotBlockResponse response = tourInventoryService.updateSlotBlock(request.getTourScheduleId(),request.getCustomerId());
+        UpdateSlotBlockResponse response = tourInventoryService.updateSlotBlock(request.getTourScheduleId(),request.getCustomerId(),request.getSlotBlockId());
 
         return new SuccessResponse(response, "Success! Cập nhật slot-blocks thành công");
 

@@ -13,4 +13,5 @@ public class SlotBlockResponse {
     private Integer newAvailableSlots;
     private Integer amount;
     private String actionType;
+    private UUID slotBlockId;
 }

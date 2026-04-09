@@ -13,7 +13,7 @@ public interface TourInventoryService {
 
     public SlotBlockResponse createSlotBlock(UUID tourScheduleId,String customerId,Integer amount,String bookingId);
 
-    public UpdateSlotBlockResponse updateSlotBlock(UUID tourScheduleId,String customerId);
+    public UpdateSlotBlockResponse updateSlotBlock(UUID tourScheduleId,String customerId,UUID slotBlockId);
 
     public void releaseExpiredSlotBlock(UUID slotBlockId);
 }
