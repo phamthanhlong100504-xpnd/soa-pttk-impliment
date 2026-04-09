@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.vn.tech</groupId>
-	<artifactId>booking-tour-service</artifactId>
+	<artifactId>booking-tour-service-1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Booking Tour Service</name>
 	<description>Microservice for managing specific tour bookings and availability</description>
@@ -51,6 +51,11 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
 
 		<dependency>
 			<groupId>com.mysql</groupId>
