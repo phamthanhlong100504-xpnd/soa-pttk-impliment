@@ -1,30 +1,25 @@
 package com.vn.tech.booking_tour_service.service;
 
+import com.vn.tech.booking_tour_service.common.BookingStatus;
 import com.vn.tech.booking_tour_service.common.OutboxStatus;
-import com.vn.tech.booking_tour_service.dto.request.booking.BookingOptionalServiceRequest;
-import com.vn.tech.booking_tour_service.dto.request.booking.CreateBookingRequest;
-import com.vn.tech.booking_tour_service.dto.request.booking.PassengerRequest;
+import com.vn.tech.booking_tour_service.common.PaymentStatus;
+import com.vn.tech.booking_tour_service.dto.request.booking.*;
 import com.vn.tech.booking_tour_service.dto.response.booking.BookingOptionalServiceResponse;
 import com.vn.tech.booking_tour_service.dto.response.booking.BookingResponse;
 import com.vn.tech.booking_tour_service.dto.response.booking.PassengerResponse;
-import com.vn.tech.booking_tour_service.entity.BookingEntity;
-import com.vn.tech.booking_tour_service.entity.BookingOptionalServiceEntity;
-import com.vn.tech.booking_tour_service.entity.OutboxEntity;
-import com.vn.tech.booking_tour_service.entity.PassengerEntity;
-import com.vn.tech.booking_tour_service.repository.BookingOptionalServiceRepository;
-import com.vn.tech.booking_tour_service.repository.BookingRepository;
-import com.vn.tech.booking_tour_service.repository.OutboxRepository;
-import com.vn.tech.booking_tour_service.repository.PassengerRepository;
+import com.vn.tech.booking_tour_service.dto.response.booking.PaymentWebhookResponse;
+import com.vn.tech.booking_tour_service.entity.*;
+import com.vn.tech.booking_tour_service.exception.AppException;
+import com.vn.tech.booking_tour_service.exception.ErrorCode;
+import com.vn.tech.booking_tour_service.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -34,8 +29,10 @@ public class BookingService {
     private PassengerRepository passengerRepository;
     private BookingOptionalServiceRepository bookingOptionalServiceRepository;
     private OutboxRepository outboxRepository;
+    private PaymentRecordRepository paymentRecordRepository;
     private final ObjectMapper objectMapper;
 
+    @Transactional
     public BookingResponse createBooking(CreateBookingRequest createBookingRequest) {
         log.info("create booking for account: {}, tour schedule {}",
             createBookingRequest.getAccountId(), createBookingRequest.getTourScheduleId());
@@ -85,8 +82,28 @@ public class BookingService {
 
         log.info("Create booking {} successfully", booking.getId());
 
-        return returnCommonResponse(booking);
+        return returnBookingResponse(booking);
     }
+
+    @Transactional
+    public BookingResponse confirmBooking(ConfirmBookingRequest confirmBookingRequest) {
+        log.info("confirmed booking: {}", confirmBookingRequest.getBookingId());
+
+        BookingEntity booking = bookingRepository.findById(confirmBookingRequest.getBookingId())
+            .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXIST));
+
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+        booking = bookingRepository.save(booking);
+
+        JsonNode payload = objectMapper.valueToTree(booking);
+
+        saveOutboxEvent("Booking", booking.getId(), "CONFIRMED_BOOKING", payload);
+
+        log.info("Confirm booking {} successfully", booking.getId());
+
+        return returnBookingResponse(booking);
+    }
+
 
     private void saveOutboxEvent(String aggregateType, UUID aggregateId, String eventType, JsonNode payload) {
         OutboxEntity outbox = OutboxEntity.builder()
@@ -100,7 +117,7 @@ public class BookingService {
         outboxRepository.save(outbox);
     }
 
-    public BookingResponse returnCommonResponse(BookingEntity booking) {
+    public BookingResponse returnBookingResponse(BookingEntity booking) {
         List<PassengerEntity> passengers = passengerRepository.findAllByBookingId(booking.getId());
         List<PassengerResponse>  passengerResponseList = new ArrayList<>();
         for  (PassengerEntity passenger : passengers) {
@@ -147,4 +164,5 @@ public class BookingService {
 
         return bookingResponse;
     }
+
 }

@@ -23,7 +23,8 @@ public class PaymentRecordEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     private UUID bookingId;
-    private UUID paymentId;
+    private String paymentId;
+    private String idempotencyKey;
     private Long amount;
     private PaymentStatus status;
 }
