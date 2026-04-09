@@ -16,6 +16,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -47,7 +48,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
 
         Inventory inventory = getInventoryByScheduleId(uuid);
 
-        log.info("[TourInventoryServiceImpl] Nhận được các dữ liệu; totalSlots : {}; availableSlots : {}; blockSlots : {}; confirmmed Slots : {}",
+        log.info("[Inventory] [TourInventoryServiceImpl] Nhận được các dữ liệu; totalSlots : {}; availableSlots : {}; blockSlots : {}; confirmmed Slots : {}",
             inventory.getTotalSlots(),inventory.getAvailableSlots(),inventory.getBlockedSlots(),inventory.getConfirmedSlots());
 
         int availableSlots = inventory.getTotalSlots() - inventory.getBlockedSlots() - inventory.getConfirmedSlots();
@@ -78,10 +79,13 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         inventory.setAvailableSlots(previousAvailableSlots - amount);
         inventoryRepository.save(inventory);
 
+        log.info("[Inventory] [TourInventoryServiceImpl] Cập nhật thành công inventory với số lượng chỗ hiện tại : {}",previousAvailableSlots - amount);
+
         // Tạo SlotBlocks
         SlotBlock slotBlock = createSlotBlockEntity(tourScheduleId,customerId,amount,bookingId);
         slotBlockRepository.save(slotBlock);
 
+        log.info("[Inventory] [TourInventoryServiceImpl] Tạo một slotblock thành công");
 
         // số lượng giảm đi
         Integer  newAvailableSlots = previousAvailableSlots - amount;
@@ -89,6 +93,8 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         // Ghi vào Inventory_history
         InventoryHistory inventoryHistory = createInventoryHistory(customerId,tourScheduleId,amount,newAvailableSlots,previousAvailableSlots);
         inventoryHistoryRepository.save(inventoryHistory);
+
+        log.info("[Inventory] [TourInventoryServiceImpl] Cập nhật history thành công");
 
         return SlotBlockResponse.builder()
             .actionType("PENDING")
@@ -113,6 +119,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
 
         slotBlock.setStatus(SlotBlock.SlotBlockStatus.CONFIRMED);
         slotBlockRepository.save(slotBlock);
+        log.info("[Inventory] [TourInventoryServiceImpl] Tạo một slotblock thành công!");
 
         // cập nhật tồn kho
         Inventory inventory = inventoryRepository.findById(tourScheduleId)
@@ -122,6 +129,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         inventory.setConfirmedSlots(inventory.getConfirmedSlots() + amount);
 
         inventoryRepository.save(inventory);
+        log.info("[Inventory] [TourInventoryServiceImpl] Cập nhật thành công inventory thành công");
 
         Integer currentAvailable = inventory.getTotalSlots() - inventory.getBlockedSlots() - inventory.getConfirmedSlots();
 
@@ -132,13 +140,63 @@ public class TourInventoryServiceImpl implements TourInventoryService {
             currentAvailable,
             slotBlock.getBookingId().toString()
         );
+        history.setCreatedAt(Instant.now());
         inventoryHistoryRepository.save(history);
+
+        log.info("[Inventory] [TourInventoryServiceImpl] Cập nhật history thành công!");
 
         return UpdateSlotBlockResponse.builder()
             .actionType("CONFIRMED")
             .confirmedSlots(amount)
             .bookingId(slotBlock.getBookingId().toString())
             .build();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    public void releaseExpiredSlotBlock(UUID slotBlockId) {
+
+        // 1. Lấy và kiểm tra lại chắc chắn nó vẫn đang PENDING
+        SlotBlock slotBlock = slotBlockRepository.findById(slotBlockId)
+            .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy SlotBlock"));
+
+        if (slotBlock.getStatus() != SlotBlock.SlotBlockStatus.PENDING) {
+            return; // Đã được xử lý bởi luồng khác, bỏ qua
+        }
+
+        Integer amount = slotBlock.getQuantity();
+        UUID tourScheduleId = slotBlock.getTourSchedule().getId();
+
+        slotBlock.setStatus(SlotBlock.SlotBlockStatus.EXPIRED);
+        slotBlockRepository.save(slotBlock);
+
+        // 3. Hoàn trả tồn kho (INVENTORY)
+        Inventory inventory = inventoryRepository.findById(tourScheduleId)
+            .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy Inventory"));
+
+        Integer previousAvailableSlots = inventory.getTotalSlots() - inventory.getConfirmedSlots() - inventory.getBlockedSlots();
+
+        // Logic cốt lõi: Trừ đi blocked, Trả lại available
+        inventory.setBlockedSlots(inventory.getBlockedSlots() - amount);
+        inventory.setAvailableSlots(previousAvailableSlots +  amount);
+        inventoryRepository.save(inventory);
+
+        // 4. Ghi lịch sử (INVENTORY HISTORY)
+        Integer newAvailableSlots = inventory.getAvailableSlots();
+        InventoryHistory history = createInventoryHistory(
+            "SYSTEM_JOB", // Actor là hệ thống tự chạy
+            tourScheduleId,
+            amount,
+            newAvailableSlots,
+            previousAvailableSlots
+
+        );
+        history.setActionType(InventoryHistory.ActionType.EXPIRE); // Thêm Enum RELEASE
+        history.setNote("Hệ thống tự động nhả vé do quá hạn giữ chỗ");
+        history.setReferenceId(slotBlock.getBookingId().toString());
+
+        inventoryHistoryRepository.save(history);
+
     }
 
     public SlotBlock createSlotBlockEntity(UUID tourScheduleId, String customerId, Integer amount, String bookingId) {

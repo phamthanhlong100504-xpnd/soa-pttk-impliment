@@ -69,7 +69,6 @@ public class InventoryHistory {
         BLOCK,
         CONFIRM,
         EXPIRE,
-        ADJUST,
         CANCEL
     }
 }

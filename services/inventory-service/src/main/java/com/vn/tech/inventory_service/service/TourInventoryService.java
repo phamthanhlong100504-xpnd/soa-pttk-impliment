@@ -14,4 +14,6 @@ public interface TourInventoryService {
     public SlotBlockResponse createSlotBlock(UUID tourScheduleId,String customerId,Integer amount,String bookingId);
 
     public UpdateSlotBlockResponse updateSlotBlock(UUID tourScheduleId,String customerId);
+
+    public void releaseExpiredSlotBlock(UUID slotBlockId);
 }
