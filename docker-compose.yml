@@ -83,6 +83,38 @@ services:
     networks:
       - app-network
 
+  # ─── Service ACCOUNT ───────────────────────────────────
+  account-service:
+    build: services/account-service
+    ports:
+      - "${ACCOUNT_SERVICE_PORT:-8081}:8081"
+    env_file:
+      - .env
+    environment:
+      - DB_URL=jdbc:postgresql://account-db:5432/${DB_ACCOUNT_NAME:-account_db}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+    depends_on:
+      - account-db
+    networks:
+      - app-network
+
+  account-db:
+    image: postgres:16-alpine
+    ports:
+      - "${DB_ACCOUNT_SERVICE_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: ${DB_ACCOUNT_NAME:-account_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
+    volumes:
+      - account-db-data:/var/lib/postgresql/data
+    command: [ "postgres", "-c", "wal_level=logical" ]
+    networks:
+      - app-network
+
+
+  # ─── Shared Infrastructure
   zookeeper:
     image: confluentinc/cp-zookeeper:${ZOOKEEPER_VERSION:-7.5.0}
     environment:
@@ -152,3 +184,4 @@ networks:
 
 volumes:
   booking-db-data:
+  account-db-data:

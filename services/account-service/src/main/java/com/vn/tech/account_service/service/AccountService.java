@@ -18,8 +18,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
 
     @Transactional(readOnly = true)
-    public AccountResponse getAccountInfo(String accessToken) {
-        UUID id = TokenHelper.getAccountIdFromToken(accessToken);
+    public AccountResponse getAccountInfo(UUID id) {
         AccountEntity account =  accountRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 

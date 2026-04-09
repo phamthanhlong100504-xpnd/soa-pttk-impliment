@@ -31,6 +31,7 @@ public class AuthService {
 
         signUpRequest.setPassword(BCrypt.hashpw(signUpRequest.getPassword(), BCrypt.gensalt()));
         AccountEntity account = AccountEntity.builder()
+            .username(signUpRequest.getUsername())
             .email(signUpRequest.getEmail())
             .password(signUpRequest.getPassword())
             .fullName(signUpRequest.getFullName())
@@ -47,6 +48,7 @@ public class AuthService {
             .build();
 
         return AccountResponse.builder()
+            .id(account.getId())
             .fullName(account.getFullName())
             .email(account.getEmail())
             .phoneNumber(account.getPhoneNumber())
@@ -86,7 +88,7 @@ public class AuthService {
             throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        UUID userId = TokenHelper.getUserIdFromToken("Bearer " + refreshRequest.getRefreshToken());
+        UUID userId = TokenHelper.getAccountIdFromToken("Bearer " + refreshRequest.getRefreshToken());
 
         AccountEntity userEntity = accountRepository.findById(userId).orElseThrow(
             () -> new AppException(ErrorCode.USER_NOT_EXISTED)
