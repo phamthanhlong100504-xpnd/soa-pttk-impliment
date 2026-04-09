@@ -94,6 +94,9 @@ services:
       - DB_URL=jdbc:postgresql://account-db:5432/${DB_ACCOUNT_NAME:-account_db}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_SHOW_SQL=true
+      - JWT_SECRET=${JWT_SECRET_KEY}
+      - JWT_EXPIRATION_ACCESS=${JWT_EXPIRATION_ACCESS}
+      - JWT_EXPIRATION_REFRESH=${JWT_EXPIRATION_REFRESH}
     depends_on:
       - account-db
     networks:

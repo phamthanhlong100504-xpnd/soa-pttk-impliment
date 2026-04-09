@@ -16,3 +16,9 @@ spring:
 
 server:
   port: ${ACCOUNT_SERVICE_PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-access: ${JWT_EXPIRATION_ACCESS}
+    expiration-refresh: ${JWT_EXPIRATION_REFRESH}
