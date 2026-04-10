@@ -1,6 +1,6 @@
 spring:
   application:
-    name: Inventory Management Service
+    name: inventory-service
 
   datasource:
     # 1. Thông tin kết nối cơ bản
@@ -55,3 +55,10 @@ logging:
     # Bật log chi tiết cho Liquibase để dễ theo dõi quá trình tạo bảng
     liquibase: DEBUG
     org.liquibase: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
