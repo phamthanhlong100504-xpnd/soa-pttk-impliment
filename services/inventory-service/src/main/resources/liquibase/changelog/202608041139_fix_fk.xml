@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="20260804-006-fix-fk" author="LongPT">
+    <dropForeignKeyConstraint baseTableName="inventory_history"
+                              constraintName="fk_history_schedule"/>
+
+    <addForeignKeyConstraint baseTableName="inventory_history"
+                             baseColumnNames="tour_schedule_id"
+                             constraintName="fk_history_inventory"
+                             referencedTableName="inventory"
+                             referencedColumnNames="tour_schedule_id"/>
+  </changeSet>
+
+</databaseChangeLog>

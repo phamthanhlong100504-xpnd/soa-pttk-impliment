@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://account-db:5432/account_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        type:
+          json_format_mapper: jackson
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+
+server:
+  port: ${ACCOUNT_SERVICE_PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-access: ${JWT_EXPIRATION_ACCESS}
+    expiration-refresh: ${JWT_EXPIRATION_REFRESH}

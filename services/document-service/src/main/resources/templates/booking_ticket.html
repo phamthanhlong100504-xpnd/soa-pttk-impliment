@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    /* Định dạng trang PDF */
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f7f6;
+        color: #333;
+    }
+    .ticket-container {
+        width: 180mm;
+        margin: 15mm auto;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+    }
+    .header {
+        background-color: #1a73e8;
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 26px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .header p {
+        margin: 5px 0 0;
+        opacity: 0.8;
+        font-size: 14px;
+    }
+    .content {
+        padding: 30px;
+    }
+    .section-title {
+        color: #1a73e8;
+        border-bottom: 2px solid #1a73e8;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .info-grid {
+        width: 100%;
+        margin-bottom: 25px;
+    }
+    .info-item {
+        padding: 8px 0;
+        vertical-align: top;
+    }
+    .label {
+        color: #757575;
+        font-size: 13px;
+        width: 35%;
+    }
+    .value {
+        color: #202124;
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .cost-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background-color: #f8f9fa;
+    }
+    .cost-table th {
+        text-align: left;
+        padding: 12px;
+        background-color: #eeeeee;
+        font-size: 14px;
+    }
+    .cost-table td {
+        padding: 15px;
+        border-top: 1px solid #dee2e6;
+        font-size: 16px;
+    }
+    .total-row {
+        background-color: #e8f0fe;
+        font-weight: bold;
+        color: #1a73e8;
+    }
+    .footer {
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #9aa0a6;
+        border-top: 1px dashed #ccc;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 5px 15px;
+        background: #34a853;
+        color: white;
+        border-radius: 20px;
+        font-size: 12px;
+        margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="ticket-container">
+  <div class="header">
+    <h1>Xác Nhận Đặt Tour</h1>
+    <p>Mã đặt chỗ: <span th:text="${bookingId != null ? bookingId : 'xxxxxx'}"></span></p>
+    <div class="status-badge">ĐÃ XÁC NHẬN</div>
+  </div>
+
+  <div class="content">
+    <div class="section-title">Thông Tin Khách Hàng</div>
+    <table class="info-grid">
+      <tr>
+        <td class="info-item label">Họ và tên:</td>
+        <td class="info-item value" th:text="${customerName != null ? customerName : 'xxxxxx'}"></td>
+      </tr>
+      <tr>
+        <td class="info-item label">Email liên hệ:</td>
+        <td class="info-item value" th:text="${email != null ? email : 'xxxxxx'}"></td>
+      </tr>
+    </table>
+
+    <div class="section-title">Chi Tiết Chuyến Đi</div>
+    <table class="info-grid">
+      <tr>
+        <td class="info-item label">Tên Tour:</td>
+        <td class="info-item value" th:text="${name_tour != null ? name_tour : 'xxxxxx'}"></td>
+      </tr>
+      <tr>
+        <td class="info-item label">Ngày khởi hành:</td>
+        <td class="info-item value" th:text="${start_date != null ? start_date : 'xxxxx'}"></td>
+      </tr>
+      <tr>
+        <td class="info-item label">Ngày kết thúc:</td>
+        <td class="info-item value" th:text="${end_date != null ? end_date : 'xxxxxx'}"></td>
+      </tr>
+    </table>
+
+    <div class="section-title">Chi Phí Thanh Toán</div>
+    <table class="cost-table">
+      <thead>
+      <tr>
+        <th>Mục thanh toán</th>
+        <th style="text-align: right;">Thành tiền</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>Giá tour trọn gói (Đã bao gồm VAT)</td>
+        <td style="text-align: right;" th:text="${cost != null ? cost : 'xxxxxxx'}"></td>
+      </tr>
+      <tr class="total-row">
+        <td>TỔNG CỘNG</td>
+        <td style="text-align: right;" th:text="${cost != null ? cost : 'xxxxxx'}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>Cảm ơn quý khách đã tin tưởng dịch vụ của chúng tôi!</p>
+    <p>Mọi thắc mắc vui lòng liên hệ hotline: 1900 6789</p>
+  </div>
+</div>
+</body>
+</html>

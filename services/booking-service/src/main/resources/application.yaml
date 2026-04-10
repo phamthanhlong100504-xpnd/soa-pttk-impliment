@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://booking-db:5432/booking_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        type:
+          json_format_mapper: jackson
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+
+server:
+  port: ${BOOKING_SERVICE_PORT:8080}
