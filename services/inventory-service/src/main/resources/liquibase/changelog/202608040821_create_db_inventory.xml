@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="20260408-001" author="LongPT">
+    <createTable tableName="tours">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="20260408-002" author="LongPT">
+    <createTable tableName="tour_schedules">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="tour_id" type="UUID">
+        <constraints nullable="false" foreignKeyName="fk_schedule_tour" referencedTableName="tours" referencedColumnNames="id"/>
+      </column>
+      <column name="code" type="VARCHAR(50)">
+        <constraints nullable="false" unique="true" uniqueConstraintName="uk_tour_schedule_code"/>
+      </column>
+      <column name="start_date" type="DATE">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="20260408-003" author="LongPT">
+    <createTable tableName="inventory">
+      <column name="tour_schedule_id" type="UUID">
+        <constraints primaryKey="true" nullable="false" foreignKeyName="fk_inventory_schedule" referencedTableName="tour_schedules" referencedColumnNames="id"/>
+      </column>
+      <column name="tour_id" type="UUID">
+        <constraints nullable="false" foreignKeyName="fk_inventory_tour" referencedTableName="tours" referencedColumnNames="id"/>
+      </column>
+      <column name="total_slots" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="available_slots" type="INT" defaultValueNumeric="0"/>
+      <column name="blocked_slots" type="INT" defaultValueNumeric="0"/>
+      <column name="confirmed_slots" type="INT" defaultValueNumeric="0"/>
+      <column name="low_stock_threshold" type="INT" defaultValueNumeric="5"/>
+      <column name="version" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+      <column name="updated_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="20260408-004" author="LongPT">
+    <createTable tableName="slot_blocks">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="tour_schedule_id" type="UUID">
+        <constraints nullable="false" foreignKeyName="fk_blocks_schedule" referencedTableName="tour_schedules" referencedColumnNames="id"/>
+      </column>
+      <column name="customer_id" type="UUID"/>
+      <column name="quantity" type="INT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column> <column name="expires_at" type="DATETIME"/>
+      <column name="booking_id" type="UUID"/>
+      <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+
+    <createIndex indexName="idx_blocks_status_expires" tableName="slot_blocks">
+      <column name="status"/>
+      <column name="expires_at"/>
+    </createIndex>
+  </changeSet>
+
+  <changeSet id="20260408-005" author="LongPT">
+    <createTable tableName="inventory_history">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="tour_schedule_id" type="UUID">
+        <constraints nullable="false" foreignKeyName="fk_history_schedule" referencedTableName="tour_schedules" referencedColumnNames="id"/>
+      </column>
+      <column name="action" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column> <column name="quantity" type="INT"/>
+      <column name="previous_available" type="INT"/>
+      <column name="new_available" type="INT"/>
+      <column name="reference_id" type="UUID"/> <column name="created_at" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+    </createTable>
+
+    <createIndex indexName="idx_inv_history_schedule" tableName="inventory_history">
+      <column name="tour_schedule_id"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>
