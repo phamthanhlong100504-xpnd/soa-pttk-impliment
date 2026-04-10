@@ -3,7 +3,6 @@ package com.vn.tech.tour_services.repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,5 +40,4 @@ public interface TourRepository extends JpaRepository<Tour, UUID> {
 		@Param("maxPrice") BigDecimal maxPrice
 	);
 
-	Optional<Tour> findBySlug(String slug);
 }
