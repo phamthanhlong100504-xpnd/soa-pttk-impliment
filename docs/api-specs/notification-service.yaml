@@ -1,0 +1,146 @@
+# ============================================
+# Notification Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Notification Service API
+  description: |
+    API specification for Notification Service.
+    Handles email, SMS, and push notifications.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: http://notification-service:8080
+    description: Docker Compose development
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/v1/emails/send:
+    post:
+      summary: Send email notification
+      operationId: sendEmail
+      tags:
+        - Emails
+      description: Send an email to a recipient with the provided name and message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+      responses:
+        '200':
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailResponse'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/notifications/test:
+    get:
+      summary: Test endpoint
+      operationId: testNotification
+      tags:
+        - Notifications
+      responses:
+        '200':
+          description: Test successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: string
+                  service:
+                    type: string
+
+components:
+  schemas:
+    EmailRequest:
+      type: object
+      required:
+        - email
+        - name
+        - subject
+        - message
+      properties:
+        email:
+          type: string
+          format: email
+          description: Recipient email address
+          example: user@example.com
+        name:
+          type: string
+          description: Name of the recipient
+          example: Nguyễn Văn A
+        subject:
+          type: string
+          description: Email subject
+          example: Xác nhận đơn hàng
+        message:
+          type: string
+          description: Email message content
+          example: Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn sẽ được gửi sớm.
+
+    EmailResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+          example: success
+        message:
+          type: string
+          example: Email đã được gửi thành công
+        email:
+          type: string
+          example: user@example.com
+        name:
+          type: string
+          example: Nguyễn Văn A
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [error]
+          example: error
+        message:
+          type: string
+          example: Email không được để trống

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+<!--  Tạo bảng-->
+  <include file="liquibase/changelog/202608040821_create_db_inventory.xml" relativeToChangelogFile="false"/>
+
+<!--  Tạo dữ liệu mẫu-->
+  <include file="changelog/202604080900_seed_initial_data.xml" relativeToChangelogFile="true"/>
+
+
+  <include file="changelog/202608041139_fix_fk.xml" relativeToChangelogFile="true"/>
+
+  <include file="changelog/202608041936_update_column_table_inventory.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
