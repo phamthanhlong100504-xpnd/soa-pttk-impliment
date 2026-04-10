@@ -31,8 +31,8 @@ EXPOSE 8081
 
 # Environment variables (có thể override khi chạy container)
 ENV SPRING_PROFILES_ACTIVE=production \
-    SERVER_PORT=8081 \
-    SERVICE_DOCUMENT_PORT=8081
+    SERVER_PORT=8083 \
+    SERVICE_DOCUMENT_PORT=8083
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \

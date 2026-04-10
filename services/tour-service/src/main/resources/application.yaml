@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: tour-service
+
+  config:
+    import: "optional:file:.env[.properties]"
+
+  datasource:
+    url: jdbc:mysql://${DB_TOUR_HOST:127.0.0.1}:${DB_TOUR_PORT:3306}/${DB_TOUR_NAME:tour_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8&createDatabaseIfNotExist=true
+    username: ${DB_TOUR_USER:root}
+    password: ${DB_TOUR_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+        use_sql_comments: true
+
+server:
+  port: ${SERVER_TOUR_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}

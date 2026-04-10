@@ -2,63 +2,55 @@ spring:
   application:
     name: inventory-service
 
+  config:
+    # Nạp file .env để Spring Boot có thể hiểu các biến ${VARIABLE}
+    import: "optional:file:.env[.properties]"
+
   datasource:
-    # 1. Thông tin kết nối cơ bản
-    # Bổ sung allowPublicKeyRetrieval=true để tránh lỗi kết nối với MySQL 8+ khi tắt SSL
-    url: jdbc:mysql://localhost:3307/inventory_booking_tour?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: K59Ptl*100504
+    # URL được xây dựng từ các biến môi trường, có giá trị mặc định sau dấu hai chấm
+    url: jdbc:mysql://${DB_INV_HOST:127.0.0.1}:${DB_INVENTORY_PORT:3306}/${DB_INVENTORY_NAME:inventory_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: ${DB_INVENTORY_USER:root}
+    password: ${DB_INVENTORY_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-    # 2. Cấu hình Hikari Connection Pool (Quản lý kết nối DB tối ưu)
     hikari:
       pool-name: HikariPool-Inventory
-      maximum-pool-size: 10 # Số lượng connection tối đa hoạt động cùng lúc
-      minimum-idle: 5       # Số lượng connection duy trì ở trạng thái chờ (nhàn rỗi)
-      idle-timeout: 300000  # Thời gian chờ của connection nhàn rỗi (5 phút)
-      max-lifetime: 1800000 # Tuổi thọ tối đa của 1 connection (30 phút)
-      connection-timeout: 20000 # Chờ tối đa 20s để lấy connection, quá hạn sẽ ném lỗi
+      maximum-pool-size: ${DB_INVENTORY_POOL_MAX:10}
+      minimum-idle: ${DB_INVENTORY_POOL_MIN:5}
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      connection-timeout: 20000
 
   liquibase:
-    # 3. Quản lý thay đổi cấu trúc DB
-    enabled: true
+    enabled: ${LIQUIBASE_INVENTORY_ENABLED:true}
     change-log: classpath:liquibase/master.xml
 
   jpa:
-    # 4. Cấu hình JPA / Hibernate
     hibernate:
-      # 'none' hoặc 'validate' là chuẩn khi đã dùng Liquibase.
-      # 'none' tắt hoàn toàn việc kiểm tra, tăng tốc độ khởi động.
-      ddl-auto: none
+      ddl-auto: ${HIBERNATE_INVENTORY_DDL:none}
       naming:
-        # Giữ nguyên tên cột/bảng theo đúng định nghĩa trong Entity, không tự động biến đổi
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-
-    # Bật true ở môi trường Dev để debug, NÊN TẮT (false) ở Production
-    show-sql: true
+    show-sql: ${SHOW_INVENTORY_SQL:true}
     properties:
       hibernate:
         format_sql: true
-        # Cơ chế tối ưu: Giải quyết bài toán N+1 Query bằng cách gom cụm truy vấn
         default_batch_fetch_size: 20
 
   sql:
     init:
-      # Ngừng ứng dụng ngay lập tức nếu có lỗi khởi tạo SQL (Safety First)
       continue-on-error: false
 
 server:
-  port: 8080 # Cổng chạy ứng dụng
+  port: ${SERVER_INVENTORY_PORT:8082}
 
 logging:
   level:
-    # Bật log chi tiết cho Liquibase để dễ theo dõi quá trình tạo bảng
-    liquibase: DEBUG
-    org.liquibase: DEBUG
+    liquibase: ${LOG_LEVEL_LIQUIBASE_INVENTORY:INFO}
+    org.liquibase: ${LOG_LEVEL_LIQUIBASE_INVENTORY:INFO}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true

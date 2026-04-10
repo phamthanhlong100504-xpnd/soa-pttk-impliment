@@ -22,3 +22,8 @@ app:
     secret: ${JWT_SECRET}
     expiration-access: ${JWT_EXPIRATION_ACCESS}
     expiration-refresh: ${JWT_EXPIRATION_REFRESH}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

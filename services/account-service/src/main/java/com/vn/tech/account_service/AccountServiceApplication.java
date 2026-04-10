@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 
 @SpringBootApplication
 @EnableWebSecurity
+@EnableDiscoveryClient
+@EnableFeignClients
 public class AccountServiceApplication {
 
 	public static void main(String[] args) {
