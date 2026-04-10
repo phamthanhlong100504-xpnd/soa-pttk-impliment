@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vn.tech.tour_services.dto.ApiResponse;
 import com.vn.tech.tour_services.dto.TourDetailRequest;
 import com.vn.tech.tour_services.dto.TourDetailResponse;
-import com.vn.tech.tour_services.dto.TourResponse;
+import com.vn.tech.tour_services.dto.TourSearchResponse;
 import com.vn.tech.tour_services.service.TourService;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class TourController {
     private final TourService tourService;
 
     @GetMapping
-    public ApiResponse<List<TourResponse>> searchTours(
+    public ApiResponse<List<TourSearchResponse>> searchTours(
         @RequestParam(name = "q", required = false) String q,
         @RequestParam(name = "departures", required = false) String departures,
         @RequestParam(name = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -44,7 +44,7 @@ public class TourController {
             q, departures, startDate, durationDays, minPrice, maxPrice
         );
 
-        List<TourResponse> tours = tourService.searchTours(
+        List<TourSearchResponse> tours = tourService.searchTours(
             q,
             departures,
             startDate,
@@ -57,7 +57,7 @@ public class TourController {
             tours.size(),
             tours.isEmpty() ? null : tours.get(0).getId());
 
-        return ApiResponse.<List<TourResponse>>builder()
+        return ApiResponse.<List<TourSearchResponse>>builder()
             .success(true)
             .data(tours)
             .message("OK")

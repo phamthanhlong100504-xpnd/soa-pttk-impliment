@@ -20,6 +20,7 @@ public interface TourRepository extends JpaRepository<Tour, UUID> {
 		LEFT JOIN departures dp ON dp.id = t.departure_id
 		WHERE (:q IS NULL
 		       OR LOWER(t.slug) LIKE CONCAT('%', :q, '%'))
+		  AND UPPER(t.status) = 'ACTIVE'
 		  AND (:departures IS NULL OR LOWER(dp.name) = LOWER(:departures))
 		  AND (:startDate IS NULL OR EXISTS (
 		      SELECT 1

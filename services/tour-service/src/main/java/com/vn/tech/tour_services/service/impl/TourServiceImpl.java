@@ -20,6 +20,7 @@ import com.vn.tech.tour_services.dto.TourDetailResponse;
 import com.vn.tech.tour_services.dto.TourItineraryResponse;
 import com.vn.tech.tour_services.dto.TourResponse;
 import com.vn.tech.tour_services.dto.TourScheduleResponse;
+import com.vn.tech.tour_services.dto.TourSearchResponse;
 import com.vn.tech.tour_services.entity.Tour;
 import com.vn.tech.tour_services.entity.TourItinerary;
 import com.vn.tech.tour_services.repository.TourItineraryRepository;
@@ -40,7 +41,7 @@ public class TourServiceImpl implements TourService {
     private final TourItineraryRepository tourItineraryRepository;
 
     @Override
-    public List<TourResponse> searchTours(
+    public List<TourSearchResponse> searchTours(
         String q,
         String departures,
         LocalDate startDate,
@@ -89,7 +90,7 @@ public class TourServiceImpl implements TourService {
         log.info("[tour-service] searchTours skip schedule loading for list endpoint");
 
         return tours.stream()
-            .map(tour -> mapToResponse(tour, Collections.emptyList()))
+            .map(this::mapToSearchResponse)
             .toList();
     }
 
@@ -167,6 +168,25 @@ public class TourServiceImpl implements TourService {
             .createdAt(tour.getCreatedAt())
             .updatedAt(tour.getUpdatedAt())
             .tourSchedules(schedules == null ? Collections.emptyList() : schedules)
+            .build();
+    }
+
+    private TourSearchResponse mapToSearchResponse(Tour tour) {
+        return TourSearchResponse.builder()
+            .id(tour.getId())
+            .slug(tour.getSlug())
+            .name(tour.getName())
+            .description(tour.getDescription())
+            .destinationId(tour.getDestinationId())
+            .departureId(tour.getDepartureId())
+            .basePrice(tour.getBasePrice())
+            .durationDays(tour.getDurationDays())
+            .durationNights(tour.getDurationNights())
+            .status(tour.getStatus())
+            .averageRating(tour.getAverageRating())
+            .reviewCount(tour.getReviewCount())
+            .createdAt(tour.getCreatedAt())
+            .updatedAt(tour.getUpdatedAt())
             .build();
     }
 

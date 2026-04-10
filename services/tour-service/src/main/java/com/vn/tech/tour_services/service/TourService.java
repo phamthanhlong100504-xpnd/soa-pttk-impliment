@@ -6,11 +6,11 @@ import java.util.List;
 
 import com.vn.tech.tour_services.dto.TourDetailRequest;
 import com.vn.tech.tour_services.dto.TourDetailResponse;
-import com.vn.tech.tour_services.dto.TourResponse;
+import com.vn.tech.tour_services.dto.TourSearchResponse;
 
 public interface TourService {
 
-    List<TourResponse> searchTours(
+    List<TourSearchResponse> searchTours(
         String q,
         String departures,
         LocalDate startDate,
