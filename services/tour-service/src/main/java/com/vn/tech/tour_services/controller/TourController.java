@@ -40,7 +40,7 @@ public class TourController {
         @RequestParam(name = "max_price", required = false) BigDecimal maxPrice
     ) {
         log.info(
-            "searchTours request q={}, departures={}, startDate={}, durationDays={}, minPrice={}, maxPrice={}",
+            "[tour-service] searchTours request q={}, departures={}, startDate={}, durationDays={}, minPrice={}, maxPrice={}",
             q, departures, startDate, durationDays, minPrice, maxPrice
         );
 
@@ -53,7 +53,7 @@ public class TourController {
             maxPrice
         );
 
-        log.info("searchTours responseCount={}, firstTourId={}",
+        log.info("[tour-service] searchTours responseCount={}, firstTourId={}",
             tours.size(),
             tours.isEmpty() ? null : tours.get(0).getId());
 
@@ -69,10 +69,10 @@ public class TourController {
         @PathVariable("slug") String slug,
         @RequestHeader(name = "X-Tour-Id", required = false) String tourIdHeader
     ) {
-        log.info("getTourDetail request slug={}, rawHeaderTourId={}", slug, tourIdHeader);
+        log.info("[tour-service] getTourDetail request slug={}, rawHeaderTourId={}", slug, tourIdHeader);
 
         UUID tourId = parseTourIdHeader(tourIdHeader);
-        log.info("getTourDetail parsedHeaderTourId={}", tourId);
+        log.info("[tour-service] getTourDetail parsedHeaderTourId={}", tourId);
 
         TourDetailRequest request = null;
         if (tourId != null) {
@@ -82,7 +82,7 @@ public class TourController {
 
         TourDetailResponse data = tourService.getTourDetail(slug, request);
 
-        log.info("getTourDetail response slug={}, tourId={}", slug, data.getTour() == null ? null : data.getTour().getId());
+        log.info("[tour-service] getTourDetail response slug={}, tourId={}", slug, data.getTour() == null ? null : data.getTour().getId());
 
         return ApiResponse.<TourDetailResponse>builder()
             .success(true)
@@ -99,7 +99,7 @@ public class TourController {
         try {
             return UUID.fromString(tourIdHeader.trim());
         } catch (IllegalArgumentException ex) {
-            log.warn("Invalid X-Tour-Id header format: {}", tourIdHeader);
+            log.warn("[tour-service] Invalid X-Tour-Id header format: {}", tourIdHeader);
             return null;
         }
     }
