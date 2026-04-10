@@ -50,22 +50,18 @@ Notes:
 
 ## 3) Quick API test
 
-### Health check
+### 10 curl samples to test the API
+
+#### 1. Health check
 
 ```bash
 curl http://localhost:5002/health
 ```
 
-Expected:
-
-```json
-{ "status": "ok" }
-```
-
-### Get tours
+#### 2. Get all tours
 
 ```bash
-curl "http://localhost:5002/tours"
+curl "http://localhost:5002/api/v1/tours"
 ```
 
 Expected shape:
@@ -78,10 +74,52 @@ Expected shape:
 }
 ```
 
-### Filter tours
+#### 3. Search by free text q
 
 ```bash
-curl "http://localhost:5002/tours?duration_days=3&min_price=1000000&max_price=5000000"
+curl "http://localhost:5002/api/v1/tours?q=Da%20Nang"
+```
+
+#### 4. Search by normalized slug text
+
+```bash
+curl "http://localhost:5002/api/v1/tours?q=da-nang"
+```
+
+#### 5. Filter by departure city
+
+```bash
+curl "http://localhost:5002/api/v1/tours?departures=Ha%20Noi"
+```
+
+#### 6. Filter by start date
+
+```bash
+curl "http://localhost:5002/api/v1/tours?start_date=2026-05-10"
+```
+
+#### 7. Filter by duration
+
+```bash
+curl "http://localhost:5002/api/v1/tours?duration_days=4"
+```
+
+#### 8. Filter by price range
+
+```bash
+curl "http://localhost:5002/api/v1/tours?min_price=6000000&max_price=8000000"
+```
+
+#### 9. Combine search with departure and duration
+
+```bash
+curl "http://localhost:5002/api/v1/tours?q=da-nang&departures=Ha%20Noi&duration_days=4"
+```
+
+#### 10. Get tour detail by slug with header tour ID
+
+```bash
+curl -H "X-Tour-Id: 40000000-0000-0000-0000-000000000001" "http://localhost:5002/api/v1/tours/da-nang-hoi-an-4d3n"
 ```
 
 ## 4) Useful commands

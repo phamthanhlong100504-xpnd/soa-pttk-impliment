@@ -1,7 +1,10 @@
 package com.vn.tech.tour_services.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -29,4 +32,8 @@ public class TourResponse {
     private Integer reviewCount;
     private Instant createdAt;
     private Instant updatedAt;
+
+    @Builder.Default
+    @JsonProperty("tour_schedules")
+    private List<TourScheduleResponse> tourSchedules = new ArrayList<>();
 }

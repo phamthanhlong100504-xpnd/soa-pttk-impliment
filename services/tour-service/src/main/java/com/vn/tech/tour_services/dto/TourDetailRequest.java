@@ -1,5 +1,9 @@
 package com.vn.tech.tour_services.dto;
 
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,10 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiResponse<T> {
+public class TourDetailRequest {
 
-    private Boolean success;
-    private T data;
-    private String message;
-    private String error;
+    @JsonProperty("tour_id")
+    private UUID tourId;
 }
