@@ -1,8 +1,8 @@
-package com.vn.tech.notification_service.dto;
+package com.vn.tech.inventory_service.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data; // Nếu bạn dùng Lombok thì chỉ cần @Data là khỏi cần viết Get/Set
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
