@@ -22,6 +22,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AuthService {
     private AccountRepository accountRepository;
+    private TokenHelper tokenHelper;
 
     @Transactional
     public AccountResponse signUp(SignUpRequest signUpRequest) {
@@ -43,8 +44,8 @@ public class AuthService {
         accountRepository.save(account);
 
         TokenResponse tokenResponse = TokenResponse.builder()
-            .accessToken(TokenHelper.generateAccessToken(account))
-            .refreshToken(TokenHelper.generateRefreshToken(account))
+            .accessToken(tokenHelper.generateAccessToken(account))
+            .refreshToken(tokenHelper.generateRefreshToken(account))
             .build();
 
         return AccountResponse.builder()
@@ -70,8 +71,8 @@ public class AuthService {
         }
 
         TokenResponse tokenResponse = TokenResponse.builder()
-            .accessToken(TokenHelper.generateAccessToken(account))
-            .refreshToken(TokenHelper.generateRefreshToken(account))
+            .accessToken(tokenHelper.generateAccessToken(account))
+            .refreshToken(tokenHelper.generateRefreshToken(account))
             .build();
 
         return AccountResponse.builder()
@@ -84,19 +85,19 @@ public class AuthService {
 
     @Transactional
     public TokenResponse refreshToken(RefreshRequest refreshRequest) {
-        if (Boolean.FALSE.equals(TokenHelper.validateRefreshToken(refreshRequest.getRefreshToken()))) {
+        if (Boolean.FALSE.equals(tokenHelper.validateRefreshToken(refreshRequest.getRefreshToken()))) {
             throw new AppException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
-        UUID userId = TokenHelper.getAccountIdFromToken("Bearer " + refreshRequest.getRefreshToken());
+        UUID userId = tokenHelper.getAccountIdFromToken("Bearer " + refreshRequest.getRefreshToken());
 
         AccountEntity userEntity = accountRepository.findById(userId).orElseThrow(
             () -> new AppException(ErrorCode.USER_NOT_EXISTED)
         );
 
         return TokenResponse.builder()
-            .accessToken(TokenHelper.generateAccessToken(userEntity))
-            .refreshToken(TokenHelper.generateRefreshToken(userEntity))
+            .accessToken(tokenHelper.generateAccessToken(userEntity))
+            .refreshToken(tokenHelper.generateRefreshToken(userEntity))
             .build();
 
     }

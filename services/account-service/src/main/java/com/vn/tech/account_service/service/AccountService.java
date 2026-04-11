@@ -7,6 +7,7 @@ import com.vn.tech.account_service.exception.AppException;
 import com.vn.tech.account_service.exception.ErrorCode;
 import com.vn.tech.account_service.repository.AccountRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,14 +15,18 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AccountService {
     private final AccountRepository accountRepository;
 
     @Transactional(readOnly = true)
     public AccountResponse getAccountInfo(UUID id) {
+
+        log.info("[controller] --> [service] Get account info: {}", id);
         AccountEntity account =  accountRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        log.info("[controller] --> [service] Get account info success: {}", id);
         return  AccountResponse.builder()
             .id(account.getId())
             .fullName(account.getFullName())

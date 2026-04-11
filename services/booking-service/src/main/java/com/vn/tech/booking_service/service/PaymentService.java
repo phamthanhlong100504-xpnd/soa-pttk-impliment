@@ -1,5 +1,6 @@
 package com.vn.tech.booking_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vn.tech.booking_service.common.OutboxStatus;
 import com.vn.tech.booking_service.dto.request.booking.PaymentWebhookRequest;
 import com.vn.tech.booking_service.dto.response.booking.PaymentWebhookResponse;
@@ -13,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.UUID;
@@ -29,7 +29,7 @@ public class PaymentService {
 
     @Transactional
     public PaymentWebhookResponse processPaymentWebhook(PaymentWebhookRequest paymentWebhookRequest) {
-        log.info("Processing payment webhook: {}", paymentWebhookRequest.getIdempotencyKey());
+        log.info("[controller] --> [service] Processing payment webhook: {}", paymentWebhookRequest.getIdempotencyKey());
 
         PaymentRecordEntity existingPayment = paymentRecordRepository.findByIdempotencyKey(paymentWebhookRequest.getIdempotencyKey());
         if (existingPayment != null) {
@@ -43,6 +43,7 @@ public class PaymentService {
         PaymentRecordEntity paymentRecord = PaymentRecordEntity.builder()
             .paymentId(paymentWebhookRequest.getPaymentId())
             .bookingId(paymentWebhookRequest.getBookingId())
+            .idempotencyKey(paymentWebhookRequest.getIdempotencyKey())
             .amount(paymentWebhookRequest.getAmount())
             .status(paymentWebhookRequest.getPaymentStatus())
             .build();
@@ -52,7 +53,7 @@ public class PaymentService {
         Map<String, Object> payload = objectMapper.convertValue(paymentRecord, Map.class);
         saveOutboxEvent("Payment",  paymentRecord.getId(), "PAYMENT_WEBHOOK_RECEIVED", payload);
 
-        log.info("Payment webhook processed: {}", paymentRecord.getIdempotencyKey());
+        log.info("[controller] --> [service] Payment webhook processed: {}", paymentRecord.getIdempotencyKey());
 
         return returnPaymentWebhookResponse(paymentRecord);
     }
