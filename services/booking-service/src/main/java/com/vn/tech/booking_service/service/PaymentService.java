@@ -1,5 +1,6 @@
 package com.vn.tech.booking_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vn.tech.booking_service.common.OutboxStatus;
 import com.vn.tech.booking_service.dto.request.booking.PaymentWebhookRequest;
 import com.vn.tech.booking_service.dto.response.booking.PaymentWebhookResponse;
@@ -13,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.UUID;

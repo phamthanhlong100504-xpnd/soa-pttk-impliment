@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
             try {
                 errorCode = ErrorCode.valueOf(fieldError.getDefaultMessage());
 
-                var error = exception.getBindingResult().getAllErrors().getFirst();
+                var error = exception.getBindingResult().getAllErrors().get(0);
                 if (error.contains(ConstraintViolation.class)) {
                     attributes = error.unwrap(ConstraintViolation.class)
                         .getConstraintDescriptor()
