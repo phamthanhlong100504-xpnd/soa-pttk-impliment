@@ -117,7 +117,7 @@ services:
   tour-db:
     image: mysql:8.0
     ports:
-      - "${DB_TOUR_SERVICE_PORT:-3307}:3306"
+      - "${DB_TOUR_SERVICE_PORT:-3309}:3306"
     environment:
       MYSQL_DATABASE: ${DB_TOUR_NAME:-tour_db}
       MYSQL_USER: ${DB_USER:-postgres}
