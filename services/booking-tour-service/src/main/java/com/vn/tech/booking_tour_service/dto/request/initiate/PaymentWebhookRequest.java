@@ -1,5 +1,6 @@
 package com.vn.tech.booking_tour_service.dto.request.initiate;
 
+import com.vn.tech.booking_tour_service.common.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +12,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Data
-public class BlockInventorySlotRequest {
-    private UUID tourId;
-    private UUID tourSlotId;
-    private UUID accountId;
+public class PaymentWebhookRequest {
     private UUID bookingId;
+    private String paymentId;
+    private String idempotencyKey;
+    private PaymentStatus paymentStatus;
+    private Long amount;
 }

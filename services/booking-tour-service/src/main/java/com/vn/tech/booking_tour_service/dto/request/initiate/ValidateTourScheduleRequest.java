@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Data
-public class ValidateTourSchedule {
-    private UUID tourScheduleI;
+public class ValidateTourScheduleRequest {
+    private UUID tourScheduleId;
     private int quantity;
 }

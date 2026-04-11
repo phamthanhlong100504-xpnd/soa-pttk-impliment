@@ -13,6 +13,7 @@ public enum ErrorCode {
     TOUR_SCHEDULE_NOT_ENOUGH_SLOTS(1004, "Tour schedule not enough slots", HttpStatus.BAD_REQUEST),
     CREATE_INVENTORY_BLOCK_SLOTS_FAIL(1005, "Create inventory block slots fail", HttpStatus.BAD_REQUEST),
     CREATE_BOOKING_FAIL(1006, "Create booking fail", HttpStatus.BAD_REQUEST),
+    PAYMENT_FAIL(1007, "Payment fail", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

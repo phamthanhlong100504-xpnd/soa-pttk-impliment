@@ -19,7 +19,7 @@ public class BookingEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-//    private String bookingCode;
+    private String bookingCode;
     private UUID accountId;
     private UUID tourScheduleId;
     private String tourName;

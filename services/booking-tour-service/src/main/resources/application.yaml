@@ -7,13 +7,13 @@ spring:
 
   temporal:
     connection:
-      target: localhost:7233
+      target: ${TEMPORAL_URL:127.0.0.1:7233}
     workers:
       - task-queue: "BOOKING_TASK_QUEUE"
         workflow-classes:
-          - com.example.BookingTaskWorkflowImpl
+          - com.vn.tech.booking_tour_service.workflow.BookingTaskWorkflowImpl
         activity-beans:
-          - bookTaskActivitiesImpl
+          - bookingTaskActivitiesImpl
 
 logging:
   level:
@@ -37,6 +37,7 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
   instance:
     prefer-ip-address: true
+

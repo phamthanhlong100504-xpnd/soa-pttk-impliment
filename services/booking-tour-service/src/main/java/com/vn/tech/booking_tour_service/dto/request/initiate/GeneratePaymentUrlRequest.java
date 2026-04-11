@@ -13,5 +13,6 @@ import java.util.UUID;
 @Data
 public class GeneratePaymentUrlRequest {
     private UUID bookingId;
-    private UUID totalPrice;
+    private Long totalPrice;
+    private String tourName;
 }

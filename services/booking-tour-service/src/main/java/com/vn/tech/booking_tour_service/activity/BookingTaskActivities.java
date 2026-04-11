@@ -2,14 +2,17 @@ package com.vn.tech.booking_tour_service.activity;
 
 import com.vn.tech.booking_tour_service.dto.request.initiate.*;
 import com.vn.tech.booking_tour_service.dto.response.initiate.BookingResponse;
+import com.vn.tech.booking_tour_service.dto.response.initiate.PaymentWebhookResponse;
 import com.vn.tech.booking_tour_service.dto.response.initiate.SlotBlockResponse;
 import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
 
+import java.util.UUID;
+
 @ActivityInterface
 public interface BookingTaskActivities {
     @ActivityMethod
-    void validateTourSchedule(ValidateTourSchedule validateTourSchedule);
+    void validateTourSchedule(ValidateTourScheduleRequest validateTourScheduleRequest);
 
     @ActivityMethod
     BookingResponse createBooking(CreateBookingRequest createBookingRequest);
@@ -17,6 +20,9 @@ public interface BookingTaskActivities {
     @ActivityMethod
     SlotBlockResponse blockInventorySlot(SlotBlockRequest slotBlockRequest);
 
+//    @ActivityMethod
+//    String generatePaymentUrl(GeneratePaymentUrlRequest generatePaymentUrlRequest);
+
     @ActivityMethod
-    void generatePaymentUrl(GeneratePaymentUrlRequest generatePaymentUrlRequest);
+    PaymentWebhookResponse payment(UUID bookingId);
 }

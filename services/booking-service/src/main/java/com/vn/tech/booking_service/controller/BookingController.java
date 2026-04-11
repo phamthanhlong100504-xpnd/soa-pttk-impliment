@@ -7,10 +7,9 @@ import com.vn.tech.booking_service.dto.response.booking.BookingResponse;
 import com.vn.tech.booking_service.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -34,6 +33,15 @@ public class BookingController {
             .code(200)
             .message("Xác nhận Booking thành công")
             .result(bookingService.confirmBooking(confirmBookingRequest))
+            .build();
+    }
+
+    @GetMapping()
+    public ApiResponse<BookingResponse> getBooking(@RequestParam UUID id) {
+        return ApiResponse.<BookingResponse>builder()
+            .code(200)
+            .message("Lấy Booking thành công")
+            .result(bookingService.getBookingById(id))
             .build();
     }
 

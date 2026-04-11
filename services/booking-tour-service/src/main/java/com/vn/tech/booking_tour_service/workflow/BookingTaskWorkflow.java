@@ -8,5 +8,4 @@ import io.temporal.workflow.WorkflowMethod;
 public interface BookingTaskWorkflow {
     @WorkflowMethod
     void initiateBooking(CreateBookingRequest createBookingRequest);
-
 }
