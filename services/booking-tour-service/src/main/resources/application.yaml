@@ -5,6 +5,16 @@ spring:
   application:
     name: booking-tour-service
 
+  temporal:
+    connection:
+      target: localhost:7233
+    workers:
+      - task-queue: "BOOKING_TASK_QUEUE"
+        workflow-classes:
+          - com.example.BookingTaskWorkflowImpl
+        activity-beans:
+          - bookTaskActivitiesImpl
+
 logging:
   level:
     com:
