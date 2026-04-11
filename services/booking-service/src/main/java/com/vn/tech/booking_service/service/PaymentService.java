@@ -29,7 +29,7 @@ public class PaymentService {
 
     @Transactional
     public PaymentWebhookResponse processPaymentWebhook(PaymentWebhookRequest paymentWebhookRequest) {
-        log.info("Processing payment webhook: {}", paymentWebhookRequest.getIdempotencyKey());
+        log.info("[controller] --> [service] Processing payment webhook: {}", paymentWebhookRequest.getIdempotencyKey());
 
         PaymentRecordEntity existingPayment = paymentRecordRepository.findByIdempotencyKey(paymentWebhookRequest.getIdempotencyKey());
         if (existingPayment != null) {
@@ -43,6 +43,7 @@ public class PaymentService {
         PaymentRecordEntity paymentRecord = PaymentRecordEntity.builder()
             .paymentId(paymentWebhookRequest.getPaymentId())
             .bookingId(paymentWebhookRequest.getBookingId())
+            .idempotencyKey(paymentWebhookRequest.getIdempotencyKey())
             .amount(paymentWebhookRequest.getAmount())
             .status(paymentWebhookRequest.getPaymentStatus())
             .build();
@@ -52,7 +53,7 @@ public class PaymentService {
         Map<String, Object> payload = objectMapper.convertValue(paymentRecord, Map.class);
         saveOutboxEvent("Payment",  paymentRecord.getId(), "PAYMENT_WEBHOOK_RECEIVED", payload);
 
-        log.info("Payment webhook processed: {}", paymentRecord.getIdempotencyKey());
+        log.info("[controller] --> [service] Payment webhook processed: {}", paymentRecord.getIdempotencyKey());
 
         return returnPaymentWebhookResponse(paymentRecord);
     }

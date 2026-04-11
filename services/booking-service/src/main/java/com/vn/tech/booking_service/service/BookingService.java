@@ -16,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.*;
 
 @Service
@@ -32,7 +31,7 @@ public class BookingService {
 
     @Transactional
     public BookingResponse createBooking(CreateBookingRequest createBookingRequest) {
-        log.info("create booking for account: {}, tour schedule {}",
+        log.info("[controller] --> [service] create booking for account: {}, tour schedule {}",
             createBookingRequest.getAccountId(), createBookingRequest.getTourScheduleId());
 
         BookingEntity booking = BookingEntity.builder()
@@ -78,14 +77,14 @@ public class BookingService {
 
         saveOutboxEvent("Booking", booking.getId(), "CREATED_BOOKING", payload);
 
-        log.info("Create booking {} successfully", booking.getId());
+        log.info("[controller] --> [service] Create booking {} successfully", booking.getId());
 
         return returnBookingResponse(booking);
     }
 
     @Transactional
     public BookingResponse confirmBooking(ConfirmBookingRequest confirmBookingRequest) {
-        log.info("confirmed booking: {}", confirmBookingRequest.getBookingId());
+        log.info("[controller] --> [service] Confirmed booking: {}", confirmBookingRequest.getBookingId());
 
         BookingEntity booking = bookingRepository.findById(confirmBookingRequest.getBookingId())
             .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXIST));
@@ -98,7 +97,7 @@ public class BookingService {
 
         saveOutboxEvent("Booking", booking.getId(), "CONFIRMED_BOOKING", payload);
 
-        log.info("Confirm booking {} successfully", booking.getId());
+        log.info("[controller] --> [service] Confirm booking {} successfully", booking.getId());
 
         return returnBookingResponse(booking);
     }

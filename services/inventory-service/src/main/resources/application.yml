@@ -7,10 +7,9 @@ spring:
     import: "optional:file:.env[.properties]"
 
   datasource:
-    # URL được xây dựng từ các biến môi trường, có giá trị mặc định sau dấu hai chấm
-    url: jdbc:mysql://${DB_INV_HOST:127.0.0.1}:${DB_INVENTORY_PORT:3306}/${DB_INVENTORY_NAME:inventory_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
-    username: ${DB_INVENTORY_USER:root}
-    password: ${DB_INVENTORY_PASSWORD:}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/inventory_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8&createDatabaseIfNotExist=true
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
     hikari:
@@ -51,6 +50,6 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
-  instance:
-    prefer-ip-address: true
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+    instance:
+      prefer-ip-address: true

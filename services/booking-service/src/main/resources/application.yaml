@@ -1,24 +1,15 @@
 spring:
   application:
-    name: booking-core-service
-
+    name: booking-service
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5434/booking-db?currentSchema=booking_db}
+    url: ${DB_URL:jdbc:postgresql://booking-db:5432/booking_db}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:K59Ptl*100504}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: org.postgresql.Driver
 
   jpa:
-    show-sql: true
-    hibernate:
-      # Lệnh quan trọng nhất để tự sinh bảng
-      ddl-auto: update
     properties:
       hibernate:
-        # Chỉ định schema mặc định cho Hibernate
-        default_schema: booking_db
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
         type:
           json_format_mapper: jackson
 
@@ -26,11 +17,11 @@ spring:
     bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
 
 server:
-  port: ${BOOKING_SERVICE_PORT:8084}
+  port: ${BOOKING_SERVICE_PORT:8080}
 
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
   instance:
     prefer-ip-address: true
