@@ -10,18 +10,20 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TokenHelper {
     @Value("${app.jwt.secret}")
-    private static String secretKey;
+    private String secretKey;
 
     @Value("${app.jwt.expiration-access}")
-    private static long expirationTimeAccessToken;
+    private long expirationTimeAccessToken;
 
     @Value("${app.jwt.expiration-refresh}")
-    private static long expirationTimeRefreshToken;
+    private long expirationTimeRefreshToken;
 
-    public static String generateAccessToken(AccountEntity account) {
+    public String generateAccessToken(AccountEntity account) {
         Date now = new Date();
         Date expirrationDate = new Date(now.getTime() + expirationTimeAccessToken);
 
@@ -30,14 +32,14 @@ public class TokenHelper {
             .claim("email",account.getEmail())
             .claim("role", account.getRole())
             .setSubject(account.getEmail())
-            .setIssuer("user-issue")
+            .setIssuer("user-issuer")
             .setIssuedAt(now)
             .setExpiration(expirrationDate)
             .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
             .compact();
     }
 
-    public static String generateRefreshToken(AccountEntity account) {
+    public String generateRefreshToken(AccountEntity account) {
         Date now = new Date();
         Date expirrationDate = new Date(now.getTime() + expirationTimeRefreshToken);
 
@@ -48,11 +50,11 @@ public class TokenHelper {
             .setSubject(account.getEmail())
             .setIssuedAt(now)
             .setExpiration(expirrationDate)
-            .signWith(SignatureAlgorithm.HS512,secretKey)
+            .signWith(SignatureAlgorithm.HS256,secretKey)
             .compact();
     }
 
-    public static UUID getAccountIdFromToken(String accessToken) {
+    public UUID getAccountIdFromToken(String accessToken) {
         accessToken = accessToken.substring(7);
         try {
             Claims claims = Jwts.parser()
@@ -65,14 +67,14 @@ public class TokenHelper {
         }
     }
 
-    private static Claims parseToken(String token) {
+    private Claims parseToken(String token) {
         return Jwts.parser()
             .setSigningKey(secretKey)
             .parseClaimsJws(token)
             .getBody();
     }
 
-    public static boolean validateRefreshToken(String token) {
+    public boolean validateRefreshToken(String token) {
         try {
             parseToken(token);
             return true;

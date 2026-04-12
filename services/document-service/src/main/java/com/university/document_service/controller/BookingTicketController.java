@@ -22,13 +22,13 @@ public class BookingTicketController {
 
     @PostMapping("/show-ticket")
     public ResponseEntity<byte[]> renderViaPost(@RequestBody BookingTicketRequest request) {
-        log.info("[Document Service] : Nhận được yêu cầu hiển thị thông tin đặt tour của tour : {}; user : {}",request.getBookingId(),request.getCustomerName());
+        log.info("[Document Service] : Nhận được yêu cầu hiển thị thông tin đặt tour của tour : {}; user : {}",request.getBookingId(),request.getTourName());
         return processRender(request);
     }
 
     @PostMapping("/file-pdf-ticket")
     public ResponseEntity<byte[]> getPdfPost(@RequestBody BookingTicketRequest request) {
-        log.info("[Document Service] : Nhận được yêu cầu tạo file pdf đặt tour của tour : {}; user : {}",request.getBookingId(),request.getCustomerName());
+        log.info("[Document Service] : Nhận được yêu cầu tạo file pdf đặt tour của tour : {}; user : {}",request.getBookingId(),request.getTourName());
         return getFilePdf(request);
     }
 
@@ -65,7 +65,7 @@ public class BookingTicketController {
             headers.setContentLength(pdfBytes.length);
 
             // Sử dụng "attachment" để tải về máy
-            headers.setContentDispositionFormData("inline", "Bill_" + request.getCustomerName() + "_code" + request.getBookingId() + ".pdf");
+            headers.setContentDispositionFormData("inline", "Bill_" + request.getAccountId() + "_code" + request.getBookingId() + ".pdf");
 
             return ResponseEntity.ok()
                 .headers(headers)

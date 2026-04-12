@@ -4,28 +4,22 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "tours")
+@EntityListeners(AuditingEntityListener.class) // Thêm để tự động điền created_at/updated_at
 public class Tour {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "VARCHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -34,15 +28,13 @@ public class Tour {
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT") // Đổi từ LONGTEXT sang TEXT
     private String description;
 
-    @Column(name = "destination_id", columnDefinition = "VARCHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "destination_id")
     private UUID destinationId;
 
-    @Column(name = "departure_id", columnDefinition = "VARCHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "departure_id")
     private UUID departureId;
 
     @Column(precision = 10, scale = 2)

@@ -1,0 +1,56 @@
+-- 0. Đảm bảo extension
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- 1. Làm sạch dữ liệu cũ
+TRUNCATE tour_categories, tour_inclusions, tour_itinerary, tour_optional_services, tour_schedules, tours, categories, departures, destinations CASCADE;
+
+-- 2. CATEGORIES (Danh mục tour)
+INSERT INTO categories (id, name, slug, description, icon) VALUES
+('660f9511-f30c-52e5-b827-557766556001'::uuid, 'Tour Cao Cấp', 'tour-cao-cap', 'Dịch vụ 5 sao', 'star-icon'),
+('660f9511-f30c-52e5-b827-557766556002'::uuid, 'Tour Giá Rẻ', 'tour-gia-re', 'Tiết kiệm tối đa', 'wallet-icon');
+
+-- 3. DESTINATIONS
+INSERT INTO destinations (id, name, slug, country, region, description) VALUES
+('660f9511-f30c-52e5-b827-557766551001'::uuid, 'Nhật Bản', 'nhat-ban', 'Japan', 'Châu Á', 'Xứ sở hoa anh đào'),
+('660f9511-f30c-52e5-b827-557766551002'::uuid, 'Hàn Quốc', 'han-quoc', 'South Korea', 'Châu Á', 'Xứ sở Kim Chi'),
+('660f9511-f30c-52e5-b827-557766551003'::uuid, 'Thái Lan', 'thai-lan', 'Thailand', 'Đông Nam Á', 'Xứ sở Chùa Vàng');
+
+-- 4. DEPARTURES
+INSERT INTO departures (id, name, slug, description) VALUES
+('660f9511-f30c-52e5-b827-557766552001'::uuid, 'Hà Nội', 'ha-noi', 'Sân bay Nội Bài'),
+('660f9511-f30c-52e5-b827-557766552002'::uuid, 'TP. Hồ Chí Minh', 'tp-ho-chi-minh', 'Sân bay Tân Sơn Nhất');
+
+-- 5. TOURS
+INSERT INTO tours (id, slug, name, description, destination_id, departure_id, base_price, duration_days, duration_nights, status, average_rating, review_count) VALUES
+('660f9511-f30c-52e5-b827-557766553001'::uuid, 'japan-sakura', 'Tour Nhật Bản', 'Hoa anh đào', '660f9511-f30c-52e5-b827-557766551001'::uuid, '660f9511-f30c-52e5-b827-557766552001'::uuid, 35000000, 6, 5, 'ACTIVE', 4.9, 20),
+('660f9511-f30c-52e5-b827-557766553002'::uuid, 'korea-seoul', 'Tour Hàn Quốc', 'Seoul Discovery', '660f9511-f30c-52e5-b827-557766551002'::uuid, '660f9511-f30c-52e5-b827-557766552001'::uuid, 15000000, 5, 4, 'ACTIVE', 4.7, 15),
+('660f9511-f30c-52e5-b827-557766553003'::uuid, 'thai-lan-go', 'Tour Thái Lan', 'Chùa Vàng', '660f9511-f30c-52e5-b827-557766551003'::uuid, '660f9511-f30c-52e5-b827-557766552002'::uuid, 8000000, 5, 4, 'ACTIVE', 4.5, 30);
+
+-- 6. TOUR_CATEGORIES (Liên kết Tour và Category)
+INSERT INTO tour_categories (tour_id, category_id) VALUES
+('660f9511-f30c-52e5-b827-557766553001'::uuid, '660f9511-f30c-52e5-b827-557766556001'::uuid),
+('660f9511-f30c-52e5-b827-557766553002'::uuid, '660f9511-f30c-52e5-b827-557766556002'::uuid),
+('660f9511-f30c-52e5-b827-557766553003'::uuid, '660f9511-f30c-52e5-b827-557766556002'::uuid);
+
+-- 7. TOUR_INCLUSIONS (Bao gồm/Không bao gồm)
+INSERT INTO tour_inclusions (id, tour_id, type, description) VALUES
+(gen_random_uuid(), '660f9511-f30c-52e5-b827-557766553001'::uuid, 'INCLUSION', 'Vé máy bay khứ hồi'),
+(gen_random_uuid(), '660f9511-f30c-52e5-b827-557766553001'::uuid, 'INCLUSION', 'Khách sạn 5 sao'),
+(gen_random_uuid(), '660f9511-f30c-52e5-b827-557766553001'::uuid, 'EXCLUSION', 'Tiền Tips cho HDV');
+
+-- 8. TOUR_OPTIONAL_SERVICES (Dịch vụ thêm)
+INSERT INTO tour_optional_services (id, tour_id, name, price, pricing_type, category, is_available, is_required, max_quantity, min_quantity) VALUES
+('660f9511-f30c-52e5-b827-557766557001'::uuid, '660f9511-f30c-52e5-b827-557766553001'::uuid, 'Visa khẩn', 2000000, 'PER_PERSON', 'Service', true, false, 10, 1),
+('660f9511-f30c-52e5-b827-557766557002'::uuid, '660f9511-f30c-52e5-b827-557766553001'::uuid, 'Phòng đơn', 5000000, 'PER_PERSON', 'Accommodation', true, false, 5, 0);
+
+-- 9. TOUR_SCHEDULES
+INSERT INTO tour_schedules (id, tour_id, code, start_date, end_date, price, max_participants, min_participants, status) VALUES
+('660f9511-f30c-52e5-b827-557766554001'::uuid, '660f9511-f30c-52e5-b827-557766553001'::uuid, 'JP-001', '2026-05-01', '2026-05-06', 35000000, 20, 10, 'OPEN'),
+('660f9511-f30c-52e5-b827-557766554004'::uuid, '660f9511-f30c-52e5-b827-557766553002'::uuid, 'KR-001', '2026-05-10', '2026-05-14', 15000000, 25, 10, 'OPEN'),
+('660f9511-f30c-52e5-b827-557766554007'::uuid, '660f9511-f30c-52e5-b827-557766553003'::uuid, 'TH-001', '2026-05-20', '2026-05-24', 8000000, 30, 15, 'OPEN');
+
+-- 10. TOUR_ITINERARY
+INSERT INTO tour_itinerary (id, tour_id, day_number, title, description, meals, activities) VALUES
+('660f9511-f30c-52e5-b827-557766555001'::uuid, '660f9511-f30c-52e5-b827-557766553001'::uuid, 1, 'Khởi hành', 'Bay đi Tokyo', '["Dinner"]'::jsonb, '{"spot": "Narita Airport"}'::jsonb),
+('660f9511-f30c-52e5-b827-557766555004'::uuid, '660f9511-f30c-52e5-b827-557766553002'::uuid, 1, 'Khởi hành', 'Bay đi Seoul', '["Dinner"]'::jsonb, '{"spot": "Incheon Airport"}'::jsonb),
+('660f9511-f30c-52e5-b827-557766555007'::uuid, '660f9511-f30c-52e5-b827-557766553003'::uuid, 1, 'Khởi hành', 'Đến Bangkok', '["Dinner"]'::jsonb, '{"spot": "Bangkok City"}'::jsonb);

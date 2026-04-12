@@ -1,5 +1,6 @@
 package com.vn.tech.booking_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vn.tech.booking_service.common.BookingStatus;
 import com.vn.tech.booking_service.common.OutboxStatus;
 import com.vn.tech.booking_service.dto.request.booking.*;
@@ -14,8 +15,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
@@ -32,7 +31,7 @@ public class BookingService {
 
     @Transactional
     public BookingResponse createBooking(CreateBookingRequest createBookingRequest) {
-        log.info("create booking for account: {}, tour schedule {}",
+        log.info("[controller] --> [service] create booking for account: {}, tour schedule {}",
             createBookingRequest.getAccountId(), createBookingRequest.getTourScheduleId());
 
         BookingEntity booking = BookingEntity.builder()
@@ -78,14 +77,14 @@ public class BookingService {
 
         saveOutboxEvent("Booking", booking.getId(), "CREATED_BOOKING", payload);
 
-        log.info("Create booking {} successfully", booking.getId());
+        log.info("[controller] --> [service] Create booking {} successfully", booking.getId());
 
         return returnBookingResponse(booking);
     }
 
     @Transactional
     public BookingResponse confirmBooking(ConfirmBookingRequest confirmBookingRequest) {
-        log.info("confirmed booking: {}", confirmBookingRequest.getBookingId());
+        log.info("[controller] --> [service] Confirmed booking: {}", confirmBookingRequest.getBookingId());
 
         BookingEntity booking = bookingRepository.findById(confirmBookingRequest.getBookingId())
             .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXIST));
@@ -98,8 +97,19 @@ public class BookingService {
 
         saveOutboxEvent("Booking", booking.getId(), "CONFIRMED_BOOKING", payload);
 
-        log.info("Confirm booking {} successfully", booking.getId());
+        log.info("[controller] --> [service] Confirm booking {} successfully", booking.getId());
 
+        return returnBookingResponse(booking);
+    }
+
+    @Transactional(readOnly = true)
+    public BookingResponse getBookingById(UUID bookingId) {
+        log.info("[controller] --> [service] Get booking: {}", bookingId);
+
+        BookingEntity booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXIST));
+
+        log.info("[controller] --> [service] Get booking {} successfully", booking.getId());
         return returnBookingResponse(booking);
     }
 
@@ -152,6 +162,7 @@ public class BookingService {
 
         BookingResponse bookingResponse = BookingResponse.builder()
             .id(booking.getId())
+            .bookingCode(booking.getBookingCode())
             .accountId(booking.getAccountId())
             .tourScheduleId(booking.getTourScheduleId())
             .tourName(booking.getTourName())

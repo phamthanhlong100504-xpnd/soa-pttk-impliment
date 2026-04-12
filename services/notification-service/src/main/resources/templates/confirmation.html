@@ -3,26 +3,89 @@
 <head>
   <meta charset="UTF-8">
 </head>
-<body style="font-family: Arial, sans-serif; padding: 20px;">
-<h2 style="color: #2e6c80;">Xác nhận đặt vé thành công!</h2>
-<p>Xin chào <b th:text="${customerName}">Khách hàng</b>,</p>
-<p>Cảm ơn bạn đã đặt tour. Dưới đây là thông tin chi tiết:</p>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333;">
 
-<table style="border: 1px solid black; border-collapse: collapse; width: 100%;">
-<!--  <tr>-->
-<!--    <td><b>Mã Booking:</b></td>-->
-<!--    <td th:text="${bookingId}">B-12345</td>-->
-<!--  </tr>-->
-<!--  <tr>-->
-<!--    <td><b>Số lượng vé:</b></td>-->
-<!--    <td th:text="${amount}">2</td>-->
-<!--  </tr>-->
-  <tr>
-    <td><b>Trạng thái:</b></td>
-    <td style="color: green; font-weight: bold;">ĐÃ XÁC NHẬN</td>
-  </tr>
-</table>
+<div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 
-<p>Chúc bạn có một chuyến đi vui vẻ!</p>
+  <h2 style="color: #2e6c80; text-align: center; border-bottom: 2px solid #2e6c80; padding-bottom: 10px;">XÁC NHẬN ĐẶT TOUR THÀNH CÔNG</h2>
+
+  <p>Xin chào <b style="color: #d9534f;" th:text="${customerName}">Khách hàng</b>,</p>
+  <p>Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin chi tiết về chuyến đi của bạn:</p>
+
+  <h3 style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #2e6c80;">Thông Tin Đặt Chỗ</h3>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; width: 40%;"><b>Mã Booking:</b></td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;" th:text="${bookingId}">N/A</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><b>Tên Tour:</b></td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;" th:text="${tourName}">N/A</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><b>Số lượng khách:</b></td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;" th:text="${quantity}">0</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><b>Slot đã giữ chỗ:</b></td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; color: #d9534f; font-weight: bold;" th:text="${confirmedSlots}">0</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><b>Trạng thái:</b></td>
+      <td style="padding: 8px; border-bottom: 1px solid #ddd; color: green; font-weight: bold;">ĐÃ XÁC NHẬN & THANH TOÁN</td>
+    </tr>
+  </table>
+
+  <h3 style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #2e6c80;">Danh Sách Hành Khách</h3>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ddd;">
+    <thead>
+    <tr style="background-color: #2e6c80; color: white;">
+      <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 15%;">STT</th>
+      <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Họ và Tên</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="passenger, iterStat : ${passengers}">
+      <td style="padding: 8px; text-align: center; border: 1px solid #ddd;" th:text="${iterStat.count}">1</td>
+      <td style="padding: 8px; border: 1px solid #ddd;" th:text="${passenger.fullName}">Tên khách</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(passengers)}">
+      <td colspan="2" style="padding: 15px; text-align: center; border: 1px solid #ddd; color: #888;">Chưa có thông tin hành khách</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <h3 style="background-color: #f8f9fa; padding: 10px; border-left: 4px solid #2e6c80;">Dịch Vụ Tùy Chọn Đi Kèm</h3>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #ddd;">
+    <thead>
+    <tr style="background-color: #2e6c80; color: white;">
+      <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Tên dịch vụ</th>
+      <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">Loại giá</th>
+      <th style="padding: 10px; text-align: center; border: 1px solid #ddd;">SL</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="service : ${optionalServices}">
+      <td style="padding: 8px; border: 1px solid #ddd;" th:text="${service.serviceName}">Dịch vụ A</td>
+      <td style="padding: 8px; text-align: center; border: 1px solid #ddd;" th:text="${service.priceType}">Người lớn</td>
+      <td style="padding: 8px; text-align: center; border: 1px solid #ddd;" th:text="${service.quantity}">1</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(optionalServices)}">
+      <td colspan="3" style="padding: 15px; text-align: center; border: 1px solid #ddd; color: #888;">Không đăng ký dịch vụ đi kèm</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div style="background-color: #fcf8e3; border: 1px solid #faebcc; padding: 15px; text-align: right; border-radius: 5px;">
+    <span style="font-size: 16px; color: #8a6d3b;">Tổng tiền thanh toán: </span>
+    <span style="font-size: 22px; font-weight: bold; color: #d9534f;" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</span>
+  </div>
+
+  <p style="text-align: center; margin-top: 30px; font-style: italic; color: #777;">Kính chúc Quý khách có một chuyến đi vui vẻ và tràn đầy kỷ niệm!</p>
+
+  <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #aaa;">
+    <p>Đây là email tự động từ hệ thống. Vui lòng không trả lời email này.</p>
+  </div>
+</div>
 </body>
 </html>

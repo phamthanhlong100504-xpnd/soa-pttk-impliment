@@ -2,9 +2,7 @@ package com.vn.tech.inventory_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,9 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Inventory {
-    // id giả để map context. Id thật chính là tour_schedule_d
+
     @Id
-    @JdbcTypeCode(Types.VARCHAR) // <--- Thêm dòng này. Cơ sở: Ép Hibernate bind tham số JDBC dưới dạng chuỗi VARCHAR.
+    @Column(name = "tour_schedule_id", updatable = false, nullable = false)
     private UUID id; // Primary key chia sẻ từ TourSchedule
 
     // Cơ chế @MapsId gắn PK của bảng này với FK tour_schedule_id
