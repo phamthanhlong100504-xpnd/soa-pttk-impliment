@@ -236,7 +236,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         );
         history.setActionType(InventoryHistory.ActionType.EXPIRE); // Thêm Enum RELEASE
         history.setNote("Hệ thống tự động nhả vé do quá hạn giữ chỗ");
-        history.setReferenceId(slotBlock.getBookingId().toString());
+        history.setReferenceId(slotBlock.getBookingId());
 
         inventoryHistoryRepository.save(history);
 
@@ -283,7 +283,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
             .previousAvailableSlots(currentAvailableSlots)
             .newAvailableSlots(currentAvailableSlots) // Không thay đổi
             .actor(customerId)
-            .referenceId(bookingId) // Ghi lại mã Booking để tra cứu chéo
+            .referenceId(UUID.fromString(bookingId)) // Ghi lại mã Booking để tra cứu chéo
             .note("Khách hàng đã thanh toán và chốt vé thành công")
             .build();
     }

@@ -41,6 +41,7 @@ services:
     env_file:
       - .env
     environment:
+      - SERVER_PORT=8080 # <-- Cố định port bên trong container
       - DB_URL=jdbc:postgresql://db:5432/${DB_BOOKING_NAME:-booking_db}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
@@ -57,6 +58,7 @@ services:
     env_file:
       - .env
     environment:
+      - SERVER_PORT=8081 # <-- Cố định port bên trong container
       - DB_URL=jdbc:postgresql://db:5432/${DB_ACCOUNT_NAME:-account_db}
       - JWT_SECRET=${JWT_SECRET_KEY}
     depends_on:
@@ -73,8 +75,8 @@ services:
     env_file:
       - .env
     environment:
-      # Duy đổi driver từ mysql sang postgresql
-      - DB_URL=jdbc:postgresql://db:5432/tour_db
+      - SERVER_PORT=8082 # <-- Cố định port bên trong container
+      - DB_URL=jdbc:postgresql://db:5432/${DB_TOUR_NAME:-tour_db}
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
     depends_on:
       db:
@@ -90,7 +92,9 @@ services:
     env_file:
       - .env
     environment:
+      - SERVER_PORT=8083 # <-- Cố định port bên trong container
       - DB_URL=jdbc:postgresql://db:5432/${DB_INVENTORY_NAME:-inventory_db}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       db:
         condition: service_healthy
@@ -102,16 +106,17 @@ services:
     build: services/booking-tour-service
     ports:
       - "${BOOKING_TOUR_SERVICE_PORT:-8090}:8090"
-    environment:
-      - TEMPORAL_URL=temporal:7233
     env_file:
       - .env
+    environment:
+      - SERVER_PORT=8090 # <-- Cố định port bên trong container
+      - TEMPORAL_URL=temporal:7233
     depends_on:
       - temporal
     networks:
       - app-network
 
-  # ─── TEMPORAL SERVER ────────────────────────────────────
+  # ─── TEMPORAL SERVER & UI ──────────────────────────────
   temporal:
     image: temporalio/auto-setup:1.23.1
     container_name: temporal-server
@@ -122,7 +127,7 @@ services:
       - DB_PORT=5432
       - POSTGRES_USER=${DB_USER:-postgres}
       - POSTGRES_PWD=${DB_PASSWORD:-123456}
-      - POSTGRES_SEEDS=db # Trỏ về service 'db'
+      - POSTGRES_SEEDS=db
     depends_on:
       db:
         condition: service_healthy
@@ -133,7 +138,7 @@ services:
     image: temporalio/ui:2.21.3
     container_name: temporal-ui
     ports:
-      - "8091:8091"
+      - "8091:8080"
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
     depends_on:
@@ -141,23 +146,26 @@ services:
     networks:
       - app-network
 
-  # ─── SERVICE DOCUMENT ───────────────────────────────────
+  # ─── SERVICE DOCUMENT & NOTIFICATION ──────────────────
   document-service:
     build: services/document-service
     ports:
       - "${DOCUMENT_SERVICE_PORT:-8084}:8084"
     env_file:
       - .env
+    environment:
+      - SERVER_PORT=8084 # <-- Cố định port bên trong container
     networks:
       - app-network
 
-  # ─── SERVICE NOTIFICATION ───────────────────────────────
   notification-service:
     build: services/notification-service
     ports:
       - "${NOTIFICATION_SERVICE_PORT:-8085}:8085"
     env_file:
       - .env
+    environment:
+      - SERVER_PORT=8085 # <-- Cố định port bên trong container
     networks:
       - app-network
 

@@ -1,11 +1,8 @@
 package com.vn.tech.inventory_service.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
 
-import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,8 +20,7 @@ public class SlotBlock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @JdbcTypeCode(Types.VARCHAR) // <--- Thêm dòng này. Cơ sở: Ép Hibernate bind tham số JDBC dưới dạng chuỗi VARCHAR.
-    @Column(name = "id", length = 36, updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     // Liên kết với TourSchedule
@@ -33,8 +29,7 @@ public class SlotBlock {
     private TourSchedule tourSchedule;
 
     @Column(name = "customer_id")
-    @JdbcTypeCode(Types.VARCHAR)
-    private UUID customerId;
+    private UUID customerId; // <--- Đã sửa: Xóa @JdbcTypeCode
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
@@ -47,8 +42,7 @@ public class SlotBlock {
     private LocalDateTime expiresAt;
 
     @Column(name = "booking_id")
-    @JdbcTypeCode(Types.VARCHAR)
-    private UUID bookingId;
+    private UUID bookingId; // <--- Đã sửa: Xóa @JdbcTypeCode
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -18,7 +18,6 @@ public class OutboxEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @JdbcTypeCode(java.sql.Types.VARCHAR)
     private UUID id;
 
     @Column(name = "aggregate_type", nullable = false)
