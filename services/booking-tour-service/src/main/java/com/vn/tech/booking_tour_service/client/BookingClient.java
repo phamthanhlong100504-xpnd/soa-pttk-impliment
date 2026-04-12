@@ -23,4 +23,7 @@ public interface BookingClient {
 
     @PostMapping("api/v1/payments/webhook")
     public ApiResponse<PaymentWebhookResponse> handlePaymentWebhook(@RequestBody PaymentWebhookRequest paymentWebhookRequest);
+
+    @PostMapping("api/v1/bookings/confirm")
+    public ApiResponse<BookingResponse> confirmBooking(@RequestBody ConfirmBookingRequest confirmBookingRequest);
 }

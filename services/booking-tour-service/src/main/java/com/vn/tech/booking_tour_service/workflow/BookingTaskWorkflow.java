@@ -8,4 +8,7 @@ import io.temporal.workflow.WorkflowMethod;
 public interface BookingTaskWorkflow {
     @WorkflowMethod
     void initiateBooking(CreateBookingRequest createBookingRequest);
+
+    @WorkflowMethod
+    void updateBooking(UUID tourScheduleId, String customerId, UUID slotBlockId, UUID bookingId, String paymentId, Long amount, String email);
 }

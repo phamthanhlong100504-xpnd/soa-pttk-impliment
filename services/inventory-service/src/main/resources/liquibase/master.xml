@@ -14,4 +14,6 @@
 
   <include file="changelog/202608041936_update_column_table_inventory.xml" relativeToChangelogFile="true"/>
 
+  <include file="changelog/202611041634_create_outbox_table.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -11,9 +11,12 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    from: ${MAIL_FROM}
+#    username: ${MAIL_USERNAME}
+    username: phamthanhlong725@gmail.com
+#    password: ${MAIL_PASSWORD}
+    password: vksc pggq japw nzkz
+#    from: ${MAIL_FROM}
+    from : phamthanhlong725@gmail.com
     properties:
       mail:
         smtp:
@@ -42,6 +45,7 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+#      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true

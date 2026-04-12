@@ -15,4 +15,8 @@ public interface InventoryClient {
 
     @PostMapping("api/v1/inventory/slot-blocks")
     public InventoryApiResponse createSlotBlocks(@RequestBody SlotBlockRequest request);
+
+    @PutMapping("api/v1/inventory/slots-blocks")
+    public ResponseEntity<ApiResponse.Payload> updateSlotsBlocks(@RequestBody UpdateSlotBlockRequest request);
+
 }

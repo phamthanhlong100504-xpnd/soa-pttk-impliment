@@ -25,4 +25,13 @@ public interface BookingTaskActivities {
 
     @ActivityMethod
     PaymentWebhookResponse payment(UUID bookingId);
+
+    @ActivityMethod
+    BookingResponse updateBooking(ConfirmBookingRequest confirmBookingRequest);
+
+    @ActivityMethod
+    UpdateSlotBlockResponse updateInventory(UpdateSlotBlockRequest updateSlotBlockRequest);
+
+    @ActivityMethod
+    void notification(EmailRequest request);
 }

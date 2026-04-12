@@ -7,13 +7,14 @@ spring:
 
   temporal:
     connection:
-      target: ${TEMPORAL_URL:127.0.0.1:7233}
+      target: 127.0.0.1:7233 # Địa chỉ của Temporal Server (Mặc định local)
+    namespace: default
     workers:
-      - task-queue: "BOOKING_TASK_QUEUE"
-        workflow-classes:
-          - com.vn.tech.booking_tour_service.workflow.BookingTaskWorkflowImpl
-        activity-beans:
-          - bookingTaskActivitiesImpl
+      - task-queue: BookingTaskQueue # Phải khớp với tên khai báo ở @WorkflowImpl
+        name: booking-worker
+        capacity:
+          max-concurrent-workflow-task-execution-size: 100
+          max-concurrent-activity-execution-size: 100
 
 logging:
   level:

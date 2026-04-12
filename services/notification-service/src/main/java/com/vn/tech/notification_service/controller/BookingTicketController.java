@@ -27,43 +27,25 @@ public class BookingTicketController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Validate input
-            if (emailRequest.getEmail() == null || emailRequest.getEmail().trim().isEmpty()) {
-                response.put("status", "error");
-                response.put("message", "Email không được để trống");
-                return ResponseEntity.badRequest().body(response);
+            if (emailRequest.getToEmail() == null || emailRequest.getToEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("Email người nhận không được để trống");
             }
 
-            if (emailRequest.getName() == null || emailRequest.getName().trim().isEmpty()) {
-                response.put("status", "error");
-                response.put("message", "Tên người nhập không được để trống");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            if (emailRequest.getSubject() == null || emailRequest.getSubject().trim().isEmpty()) {
-                response.put("status", "error");
-                response.put("message", "Tiêu đề email không được để trống");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            if (emailRequest.getMessage() == null || emailRequest.getMessage().trim().isEmpty()) {
-                response.put("status", "error");
-                response.put("message", "Nội dung email không được để trống");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // Send email
+            // Gọi Service gửi mail (Nếu lỗi nó sẽ nhảy thẳng xuống block catch)
             emailService.sendEmail(emailRequest);
 
             response.put("status", "success");
-            response.put("message", "Email đã được gửi thành công");
-            response.put("email", emailRequest.getEmail());
-            response.put("name", emailRequest.getName());
-
+            response.put("message", "Email đã được đưa vào hàng đợi gửi thành công");
+            response.put("bookingId", emailRequest.getBookingId());
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+
+        } catch (IllegalArgumentException e) {
             response.put("status", "error");
             response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Lỗi hệ thống khi gửi mail: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
