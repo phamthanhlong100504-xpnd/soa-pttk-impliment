@@ -1,46 +1,17 @@
-# ==============================================
-# API Gateway Dockerfile
-# Replace this template with your actual setup
-# ==============================================
-#
-# Examples for common frameworks:
-#
-# ── Node.js (Express/Fastify) ──
-# FROM node:20-alpine
-# WORKDIR /app
-# COPY package*.json ./
-# RUN npm ci --production
-# COPY src/ ./src/
-# EXPOSE 8000
-# CMD ["node", "src/index.js"]
-#
-# ── Python (FastAPI/Flask) ──
-# FROM python:3.12-slim
-# WORKDIR /app
-# COPY requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
-# COPY src/ ./src/
-# EXPOSE 8000
-# CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
-#
-# ── Go ──
-# FROM golang:1.22-alpine AS builder
-# WORKDIR /app
-# COPY go.* ./
-# RUN go mod download
-# COPY . .
-# RUN go build -o gateway ./src
-# FROM alpine:3.19
-# COPY --from=builder /app/gateway /gateway
-# EXPOSE 8000
-# CMD ["/gateway"]
-#
-# ── Nginx (reverse proxy) ──
-# FROM nginx:alpine
-# COPY nginx.conf /etc/nginx/nginx.conf
-# EXPOSE 8000
-# CMD ["nginx", "-g", "daemon off;"]
+FROM kong:latest
 
-# TODO: Uncomment one of the examples above and adapt it,
-#       or write your own Dockerfile for your chosen stack.
-FROM scratch
+USER root
+
+COPY kong.yml /usr/local/kong/declarative/kong.yml
+
+ENV KONG_PLUGINS=bundled,eureka
+ENV KONG_DATABASE=off
+ENV KONG_DECLARATIVE_CONFIG=/usr/local/kong/declarative/kong.yml
+ENV KONG_PROXY_ACCESS_LOG=/dev/stdout
+ENV KONG_ADMIN_ACCESS_LOG=/dev/stdout
+ENV KONG_PROXY_ERROR_LOG=/dev/stderr
+ENV KONG_ADMIN_ERROR_LOG=/dev/stderr
+ENV KONG_ADMIN_LISTEN=0.0.0.0:8001
+
+
+EXPOSE 8000 8001

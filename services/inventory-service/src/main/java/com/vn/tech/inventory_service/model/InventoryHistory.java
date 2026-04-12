@@ -1,14 +1,12 @@
 package com.vn.tech.inventory_service.model;
+
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.sql.Types;
 import java.time.Instant;
 import java.util.UUID;
-
 
 @Entity
 @Table(name = "inventory_history")
@@ -22,8 +20,7 @@ public class InventoryHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @JdbcTypeCode(Types.VARCHAR) // <--- Thêm dòng này. Cơ sở: Ép Hibernate bind tham số JDBC dưới dạng chuỗi VARCHAR.
-    @Column(name = "id", length = 36, updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     // Liên kết với Inventory. Dùng FetchType.LAZY để tối ưu hiệu suất
@@ -50,7 +47,7 @@ public class InventoryHistory {
 
     // Mã tham chiếu đến Booking ID, Order ID hoặc Ticket ID gây ra sự thay đổi này
     @Column(name = "reference_id")
-    private String referenceId;
+    private UUID referenceId;
 
     // User ID hoặc System Service nào thực hiện hành động này
     @Column(name = "actor", nullable = false)

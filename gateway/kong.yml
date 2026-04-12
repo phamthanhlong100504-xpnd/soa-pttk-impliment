@@ -1,0 +1,96 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  # --- Account Service (Auth & Profile)
+  - name: account-service
+    host: account-service
+    port: 8081
+    protocol: http
+    routes:
+      - name: account-route
+        paths:
+          - /api/v1/accounts
+          - /api/v1/auth
+        strip_path: false
+
+  # --- Booking Service ---
+  - name: booking-service
+    host: booking-service
+    port: 8080
+    protocol: http
+    routes:
+      - name: booking-route
+        paths:
+          - /api/v1/bookings
+        strip_path: false
+        plugins:
+          - name: jwt
+            config:
+              key_claim_name: iss
+          - name: rate-limiting
+            config:
+              minute: 30
+              policy: local
+
+      - name: payos-webhook-public-route
+        paths:
+          - /api/v1/payments
+        methods:
+          - POST
+        strip_path: false
+        plugins: []
+
+  # --- Tour Service ---
+  - name: tour-service
+    host: tour-service
+    port: 8082
+    protocol: http
+    routes:
+      - name: tour-route
+        paths:
+          - /api/v1/tours
+        strip_path: false
+    plugins:
+      - name: jwt
+
+  # --- Inventory Service ---
+  - name: inventory-service
+    host: inventory-service
+    port: 8083
+    protocol: http
+    routes:
+      - name: inventory-route
+        paths:
+          - /api/v1/inventory
+        strip_path: false
+
+  # --- Document Service ---
+  - name: document-service
+    host: document-service
+    port: 8083
+    protocol: http
+    routes:
+      - name: document-route
+        paths:
+          - /api/v1/documents
+        strip_path: false
+
+  # --- Booking Tour Service
+  - name: booking-tour-service
+    host: booking-tour-service
+    port: 8090
+    protocol: http
+    routes:
+      - name: booking-tour-route
+        paths:
+          - /api/v1/booking-tour
+        strip_path: false
+
+
+consumers:
+  - username: app-user
+    jwt_secrets:
+      - key: user-issuer
+        secret: ry9YVEjta6Fp4pyzLWeZHloUx7FMZG0FCkpKHyBqrcS
+        algorithm: HS256

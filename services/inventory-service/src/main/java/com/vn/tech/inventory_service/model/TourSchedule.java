@@ -2,9 +2,7 @@ package com.vn.tech.inventory_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
 
-import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +19,7 @@ public class TourSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @JdbcTypeCode(Types.VARCHAR) // <--- Thêm dòng này. Cơ sở: Ép Hibernate bind tham số JDBC dưới dạng chuỗi VARCHAR.
-    @Column(name = "id", length = 36, updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,8 +39,4 @@ public class TourSchedule {
     @OneToMany(mappedBy = "tourSchedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<SlotBlock> slotBlocks = new ArrayList<>();
-
-//    @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @Builder.Default
-//    private List<InventoryHistory> histories = new ArrayList<>();
 }

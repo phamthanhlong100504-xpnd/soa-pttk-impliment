@@ -1,16 +1,12 @@
 package com.vn.tech.inventory_service.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vn.tech.inventory_service.dto.response.AvailableResponse;
 import com.vn.tech.inventory_service.dto.response.SlotBlockResponse;
 import com.vn.tech.inventory_service.dto.response.UpdateSlotBlockResponse;
-import com.vn.tech.inventory_service.model.Inventory;
-import com.vn.tech.inventory_service.model.InventoryHistory;
-import com.vn.tech.inventory_service.model.SlotBlock;
-import com.vn.tech.inventory_service.model.TourSchedule;
-import com.vn.tech.inventory_service.repository.InventoryHistoryRepository;
-import com.vn.tech.inventory_service.repository.InventoryRepository;
-import com.vn.tech.inventory_service.repository.SlotBlockRepository;
-import com.vn.tech.inventory_service.repository.TourScheduleRepository;
+import com.vn.tech.inventory_service.model.*;
+import com.vn.tech.inventory_service.repository.*;
 import com.vn.tech.inventory_service.service.TourInventoryService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +35,10 @@ public class TourInventoryServiceImpl implements TourInventoryService {
     private final SlotBlockRepository slotBlockRepository;
 
     private final InventoryHistoryRepository inventoryHistoryRepository;
+
+    private final ObjectMapper objectMapper;
+
+    private final OutboxRepository outboxRepository;
 
 
     @Override
@@ -119,6 +119,18 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         SlotBlock slotBlock = slotBlockRepository.findById(slotBlockId)
             .orElseThrow(() -> new IllegalArgumentException("Giữ chỗ đã hết hạn hoặc không tồn tại đối với khách hàng này."));
 
+        // kiểm tra tính lũy đẳng
+
+        if(SlotBlock.SlotBlockStatus.CONFIRMED.equals(slotBlock.getStatus())) {
+            log.info("[Inventory] [Idempotency] Slot block {} đã được confirm từ trước. Bỏ qua xử lý DB để tránh trừ đúp vé.", slotBlockId);
+            return UpdateSlotBlockResponse.builder()
+                .actionType("ALREADY_CONFIRMED")
+                .confirmedSlots(slotBlock.getQuantity())
+//                .bookingId(slotBlock.getBookingId().toString())
+                .bookingId(slotBlock.getBookingId().toString())
+                .build();
+        }
+
         Integer amount = slotBlock.getQuantity();
 
         slotBlock.setStatus(SlotBlock.SlotBlockStatus.CONFIRMED);
@@ -148,6 +160,33 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         inventoryHistoryRepository.save(history);
 
         log.info("[Inventory] [TourInventoryServiceImpl] Cập nhật history thành công!");
+
+        // ==========================================
+        // 4. LƯU VÀO BẢNG OUTBOX (BÁO CÁO KẾT QUẢ CHO SAGA)
+        // ==========================================
+        try {
+            // Tạo payload dạng JSON để gửi đi
+            ObjectNode payload = objectMapper.createObjectNode();
+            payload.put("bookingId", slotBlock.getBookingId().toString());
+            payload.put("tourScheduleId", tourScheduleId.toString());
+            payload.put("amount", amount);
+
+            OutboxEntity outbox = OutboxEntity.builder()
+                .aggregateId(slotBlock.getBookingId().toString()) // Gắn với BookingID để thằng Nhạc trưởng dễ xử lý
+                .aggregateType("INVENTORY")
+                .eventType("INVENTORY_UPDATED_SUCCESS") // Tên topic hoặc Header để Kafka/Debezium nhận diện
+                .payload(payload.toString()) // Lưu chuỗi JSON
+                .status("PENDING") // Trạng thái chờ Debezium/Job quét
+                .createdAt(Instant.now())
+                .build();
+
+            outboxRepository.save(outbox);
+
+            log.info("[Inventory] Lưu sự kiện vào Outbox thành công. EventType: INVENTORY_UPDATED_SUCCESS");
+        } catch (Exception e) {
+            log.error("[Inventory] Lỗi khi lưu Outbox. Buộc Rollback toàn bộ giao dịch!", e);
+            throw e; // Ném lỗi để @Transactional rollback lại cả kho vé
+        }
 
         return UpdateSlotBlockResponse.builder()
             .actionType("CONFIRMED")
@@ -197,7 +236,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
         );
         history.setActionType(InventoryHistory.ActionType.EXPIRE); // Thêm Enum RELEASE
         history.setNote("Hệ thống tự động nhả vé do quá hạn giữ chỗ");
-        history.setReferenceId(slotBlock.getBookingId().toString());
+        history.setReferenceId(slotBlock.getBookingId());
 
         inventoryHistoryRepository.save(history);
 
@@ -244,7 +283,7 @@ public class TourInventoryServiceImpl implements TourInventoryService {
             .previousAvailableSlots(currentAvailableSlots)
             .newAvailableSlots(currentAvailableSlots) // Không thay đổi
             .actor(customerId)
-            .referenceId(bookingId) // Ghi lại mã Booking để tra cứu chéo
+            .referenceId(UUID.fromString(bookingId)) // Ghi lại mã Booking để tra cứu chéo
             .note("Khách hàng đã thanh toán và chốt vé thành công")
             .build();
     }

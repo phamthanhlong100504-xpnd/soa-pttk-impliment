@@ -1,18 +1,35 @@
 spring:
+  application:
+    name: booking-service
+
+  config:
+    import: "optional:file:.env[.properties]"
+
   datasource:
-    url: ${DB_URL:jdbc:postgresql://booking-db:5432/booking_db}
-    username: ${DB_USERNAME:postgres}
+    url: ${DB_URL:jdbc:postgresql://db:5432/booking_db}
+    username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:123456}
     driver-class-name: org.postgresql.Driver
 
   jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
-        type:
-          json_format_mapper: jackson
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+    bootstrap-servers: ${KAFKA_BROKER:kafka:9092}
 
 server:
   port: ${BOOKING_SERVICE_PORT:8080}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+  instance:
+    prefer-ip-address: true

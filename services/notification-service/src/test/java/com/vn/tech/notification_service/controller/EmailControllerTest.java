@@ -11,6 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,12 +32,12 @@ public class EmailControllerTest {
 
     @Test
     public void testSendEmailSuccess() throws Exception {
-        EmailRequest emailRequest = new EmailRequest(
-            "user@example.com",
-            "Nguyễn Văn A",
-            "Xác nhận đơn hàng",
-            "Cảm ơn bạn đã đặt hàng"
-        );
+
+        UUID uuid = UUID.randomUUID();
+        EmailRequest emailRequest = EmailRequest.builder()
+            .toEmail("example@gmail.com")
+            .accountId(uuid)
+            .build();
 
         mockMvc.perform(post("/api/v1/emails/send")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -48,12 +50,11 @@ public class EmailControllerTest {
 
     @Test
     public void testSendEmailMissingEmail() throws Exception {
-        EmailRequest emailRequest = new EmailRequest(
-            null,
-            "Nguyễn Văn A",
-            "Xác nhận đơn hàng",
-            "Cảm ơn bạn đã đặt hàng"
-        );
+        UUID uuid = UUID.randomUUID();
+        EmailRequest emailRequest = EmailRequest.builder()
+            .toEmail("example@gmail.com")
+            .accountId(uuid)
+            .build();
 
         mockMvc.perform(post("/api/v1/emails/send")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -65,12 +66,11 @@ public class EmailControllerTest {
 
     @Test
     public void testSendEmailMissingName() throws Exception {
-        EmailRequest emailRequest = new EmailRequest(
-            "user@example.com",
-            null,
-            "Xác nhận đơn hàng",
-            "Cảm ơn bạn đã đặt hàng"
-        );
+        UUID uuid = UUID.randomUUID();
+        EmailRequest emailRequest = EmailRequest.builder()
+            .toEmail("example@gmail.com")
+            .accountId(uuid)
+            .build();
 
         mockMvc.perform(post("/api/v1/emails/send")
                 .contentType(MediaType.APPLICATION_JSON)

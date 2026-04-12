@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for Document Service
 # Stage 1: Build with Maven
-FROM maven:3.9-eclipse-temurin-17 AS builder
+FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /build
 
@@ -15,7 +15,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # Stage 2: Runtime with minimal image
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 LABEL maintainer="Your Team" \
       description="Document Service - PDF Ticket Generation" \
@@ -31,8 +31,8 @@ EXPOSE 8081
 
 # Environment variables (có thể override khi chạy container)
 ENV SPRING_PROFILES_ACTIVE=production \
-    SERVER_PORT=8081 \
-    SERVICE_DOCUMENT_PORT=8081
+    SERVER_PORT=8083 \
+    SERVICE_DOCUMENT_PORT=8083
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \

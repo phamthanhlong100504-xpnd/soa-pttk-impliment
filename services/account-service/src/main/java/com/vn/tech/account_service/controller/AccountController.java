@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/accounts")
+@RequestMapping("/api/v1/accounts")
 public class AccountController {
     private AccountService accountService;
 
