@@ -114,37 +114,71 @@
 <div class="ticket-container">
   <div class="header">
     <h1>Xác Nhận Đặt Tour</h1>
-    <p>Mã đặt chỗ: <span th:text="${bookingId != null ? bookingId : 'xxxxxx'}"></span></p>
+    <p>Mã đặt chỗ: <span th:text="${bookingId != null ? bookingId : 'N/A'}"></span></p>
     <div class="status-badge">ĐÃ XÁC NHẬN</div>
   </div>
 
   <div class="content">
-    <div class="section-title">Thông Tin Khách Hàng</div>
-    <table class="info-grid">
-      <tr>
-        <td class="info-item label">Họ và tên:</td>
-        <td class="info-item value" th:text="${customerName != null ? customerName : 'xxxxxx'}"></td>
-      </tr>
-      <tr>
-        <td class="info-item label">Email liên hệ:</td>
-        <td class="info-item value" th:text="${email != null ? email : 'xxxxxx'}"></td>
-      </tr>
-    </table>
-
     <div class="section-title">Chi Tiết Chuyến Đi</div>
     <table class="info-grid">
       <tr>
         <td class="info-item label">Tên Tour:</td>
-        <td class="info-item value" th:text="${name_tour != null ? name_tour : 'xxxxxx'}"></td>
+        <td class="info-item value" th:text="${tourName != null ? tourName : 'N/A'}"></td>
       </tr>
       <tr>
-        <td class="info-item label">Ngày khởi hành:</td>
-        <td class="info-item value" th:text="${start_date != null ? start_date : 'xxxxx'}"></td>
+        <td class="info-item label">Số lượng khách đặt:</td>
+        <td class="info-item value" th:text="${quantity != null ? quantity : '0'}"></td>
       </tr>
       <tr>
-        <td class="info-item label">Ngày kết thúc:</td>
-        <td class="info-item value" th:text="${end_date != null ? end_date : 'xxxxxx'}"></td>
+        <td class="info-item label">Số slot đã giữ thành công:</td>
+        <td class="info-item value" th:text="${confirmedSlots != null ? confirmedSlots : '0'}"></td>
       </tr>
+      <tr>
+        <td class="info-item label">Mã Lịch trình (Schedule ID):</td>
+        <td class="info-item value" th:text="${tourScheduleId != null ? tourScheduleId : 'N/A'}"></td>
+      </tr>
+    </table>
+
+    <div class="section-title">Danh Sách Hành Khách</div>
+    <table class="cost-table">
+      <thead>
+      <tr>
+        <th style="width: 10%;">STT</th>
+        <th>Họ và tên hành khách</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="passenger, iterStat : ${passengers}">
+        <td th:text="${iterStat.count}"></td>
+        <td th:text="${passenger.fullName}"></td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(passengers)}">
+        <td colspan="2" style="text-align: center;">Không có thông tin hành khách</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">Dịch Vụ Tùy Chọn Đi Kèm</div>
+    <table class="cost-table">
+      <thead>
+      <tr>
+        <th style="width: 10%;">STT</th>
+        <th>Tên dịch vụ</th>
+        <th>Loại giá</th>
+        <th style="text-align: center;">Số lượng</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="service, iterStat : ${optionalServices}">
+        <td th:text="${iterStat.count}"></td>
+        <td th:text="${service.serviceName}"></td>
+        <td th:text="${service.priceType}"></td>
+        <td style="text-align: center;" th:text="${service.quantity}"></td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(optionalServices)}">
+        <td colspan="4" style="text-align: center;">Không đăng ký dịch vụ đi kèm</td>
+      </tr>
+      </tbody>
     </table>
 
     <div class="section-title">Chi Phí Thanh Toán</div>
@@ -156,21 +190,12 @@
       </tr>
       </thead>
       <tbody>
-      <tr>
-        <td>Giá tour trọn gói (Đã bao gồm VAT)</td>
-        <td style="text-align: right;" th:text="${cost != null ? cost : 'xxxxxxx'}"></td>
-      </tr>
       <tr class="total-row">
-        <td>TỔNG CỘNG</td>
-        <td style="text-align: right;" th:text="${cost != null ? cost : 'xxxxxx'}"></td>
+        <td>TỔNG CỘNG ĐÃ THANH TOÁN (VND)</td>
+        <td style="text-align: right;" th:text="${totalPrice != null ? totalPrice : '0'}"></td>
       </tr>
       </tbody>
     </table>
-  </div>
-
-  <div class="footer">
-    <p>Cảm ơn quý khách đã tin tưởng dịch vụ của chúng tôi!</p>
-    <p>Mọi thắc mắc vui lòng liên hệ hotline: 1900 6789</p>
   </div>
 </div>
 </body>

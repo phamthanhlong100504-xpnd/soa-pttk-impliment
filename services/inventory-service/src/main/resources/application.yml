@@ -7,9 +7,11 @@ spring:
     import: "optional:file:.env[.properties]"
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/inventory_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8&createDatabaseIfNotExist=true
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:123456}
+    url: ${DB_URL:jdbc:mysql://localhost:3307/inventory_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8&createDatabaseIfNotExist=true
+#    username: ${DB_USER:postgres}
+#    password: ${DB_PASSWORD:123456}
+    username : root
+    password : K59Ptl*100504
     driver-class-name: com.mysql.cj.jdbc.Driver
 
     hikari:
@@ -50,6 +52,7 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+#      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
     instance:
       prefer-ip-address: true

@@ -22,15 +22,22 @@ public class EmailService {
     private TemplateEngine templateEngine; // Tiêm Thymeleaf vào đây
 
     @Async // Đánh dấu chạy ngầm
-    public void sendEmail(EmailRequest emailRequest) {
+    public void sendEmail(EmailRequest request) {
         try {
-            log.info("Bắt đầu gửi email tới: {}", emailRequest.getEmail());
+            log.info("Bắt đầu gửi email xác nhận vé tới: {}", request.getToEmail());
 
             // 1. Nhét dữ liệu từ DTO vào HTML Template
             Context context = new Context();
-            context.setVariable("customerName", emailRequest.getName());
-//            context.setVariable("bookingId", emailRequest.getBookingId());
-//            context.setVariable("amount", emailRequest.getAmount());
+            context.setVariable("customerName", request.getCustomerName());
+            context.setVariable("bookingId", request.getBookingId());
+            context.setVariable("tourName", request.getTourName());
+            context.setVariable("quantity", request.getQuantity());
+            context.setVariable("confirmedSlots", request.getConfirmedSlots());
+            context.setVariable("totalPrice", request.getTotalPrice());
+
+            // Nhét cả mảng (List) vào để HTML tự lặp
+            context.setVariable("passengers", request.getPassengers());
+            context.setVariable("optionalServices", request.getOptionalServices());
 
             // Chữ "confirmation" phải khớp chính xác với tên file confirmation.html
             String htmlContent = templateEngine.process("confirmation", context);
@@ -39,15 +46,15 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setTo(emailRequest.getEmail());
-            helper.setSubject(emailRequest.getSubject());
-            helper.setText(htmlContent, true); // true = Báo cho Gmail biết đây là HTML
+            helper.setTo(request.getToEmail());
+            helper.setSubject(request.getSubject() != null ? request.getSubject() : "Xác nhận đặt vé Tour thành công - " + request.getBookingId());
+            helper.setText(htmlContent, true);
 
             mailSender.send(message);
-            log.info("Gửi email thành công tới: {}", emailRequest.getEmail());
+            log.info("Đã gửi email thành công tới: {}", request.getToEmail());
 
         } catch (Exception e) {
-            log.error("Lỗi khi gửi email tới {}: {}", emailRequest.getEmail(), e.getMessage());
+            log.error("Lỗi khi gửi email tới {}: {}", request.getToEmail(), e.getMessage());
         }
     }
 }

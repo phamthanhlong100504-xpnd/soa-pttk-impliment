@@ -5,6 +5,17 @@ spring:
   application:
     name: booking-tour-service
 
+  temporal:
+    connection:
+      target: 127.0.0.1:7233 # Địa chỉ của Temporal Server (Mặc định local)
+    namespace: default
+    workers:
+      - task-queue: BookingTaskQueue # Phải khớp với tên khai báo ở @WorkflowImpl
+        name: booking-worker
+        capacity:
+          max-concurrent-workflow-task-execution-size: 100
+          max-concurrent-activity-execution-size: 100
+
 logging:
   level:
     com:
@@ -30,3 +41,4 @@ eureka:
       defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
   instance:
     prefer-ip-address: true
+

@@ -22,13 +22,13 @@ public class BookingTicketController {
 
     @PostMapping("/show-ticket")
     public ResponseEntity<byte[]> renderViaPost(@RequestBody BookingTicketRequest request) {
-        log.info("[Document Service] : Nhận được yêu cầu hiển thị thông tin đặt tour của tour : {}; user : {}",request.getBookingId(),request.getCustomerName());
+        log.info("[Document Service] : Nhận được yêu cầu hiển thị thông tin đặt tour của tour : {}; user : {}",request.getBookingId(),request.getTourName());
         return processRender(request);
     }
 
     @PostMapping("/file-pdf-ticket")
     public ResponseEntity<byte[]> getPdfPost(@RequestBody BookingTicketRequest request) {
-        log.info("[Document Service] : Nhận được yêu cầu tạo file pdf đặt tour của tour : {}; user : {}",request.getBookingId(),request.getCustomerName());
+        log.info("[Document Service] : Nhận được yêu cầu tạo file pdf đặt tour của tour : {}; user : {}",request.getBookingId(),request.getTourName());
         return getFilePdf(request);
     }
 
