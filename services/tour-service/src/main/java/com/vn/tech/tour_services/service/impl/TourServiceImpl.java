@@ -96,21 +96,22 @@ public class TourServiceImpl implements TourService {
     public TourDetailResponse getTourDetail(String slug, UUID tourId) {
         log.info("[tour-service] getTourDetail called with slug={}, headerTourId={}", slug, tourId);
 
-        if (tourId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "X-Tour-Id header is required");
+        Tour tour;
+        if (tourId != null) {
+            tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
+            if (slug != null && !slug.equals(tour.getSlug())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slug does not match tour_id");
+            }
+        } else {
+            tour = tourRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found: " + slug));
         }
 
-        UUID queryTourId = tourId;
-
-        Tour tour = tourRepository.findById(queryTourId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
+        UUID queryTourId = tour.getId();
 
         log.info("[tour-service] getTourDetail resolvedTourId={}, resolvedSlug={}, resolvedDepartureId={}, resolvedDestinationId={}",
             tour.getId(), tour.getSlug(), tour.getDepartureId(), tour.getDestinationId());
-
-        if (slug == null || !slug.equals(tour.getSlug())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slug does not match tour_id");
-        }
 
         List<TourScheduleResponse> schedules = tourScheduleRepository.findByTourIdOrderByStartDateAsc(queryTourId)
             .stream()

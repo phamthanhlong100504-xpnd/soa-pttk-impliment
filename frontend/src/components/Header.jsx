@@ -1,11 +1,21 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/header.css";
 
 export function Header() {
+  const { isLoggedIn, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <header className="header">
       <div className="header__container">
-        <div className="logo">
+        <div className="logo" onClick={() => navigate("/")}>
           <span className="logo__icon">✈️</span>
           <span className="logo__text">VietTours</span>
         </div>
@@ -26,7 +36,18 @@ export function Header() {
         </nav>
 
         <div className="header__actions">
-          <button className="header__user-btn">👤</button>
+          {isLoggedIn ? (
+            <div className="header__user-info">
+              <span className="header__username">👤 {user?.fullName || user?.email}</span>
+              <button className="header__logout-btn" onClick={handleLogout}>
+                Đăng xuất
+              </button>
+            </div>
+          ) : (
+            <button className="header__login-btn" onClick={() => navigate("/login")}>
+              Đăng nhập
+            </button>
+          )}
         </div>
       </div>
     </header>

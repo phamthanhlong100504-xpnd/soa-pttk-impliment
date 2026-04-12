@@ -1,117 +1,57 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { SearchFilter } from "../components/SearchFilter";
 import { TourCard } from "../components/TourCard";
 import { EmptyState } from "../components/EmptyState";
+import { API_BASE_URL } from "../config/api";
 import "../styles/home.css";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-
-const mockTours = [
-  {
-    slug: "ha-noi-sapa",
-    name: "Hà Nội - Sapa 3N2Đ",
-    price: 3200000,
-    duration_days: 3,
-    departures: "Hà Nội",
-    rating_score: 4.7,
-    rating_count: 128,
-    cover_image_url:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    slug: "da-nang-hoi-an",
-    name: "Đà Nẵng - Hội An 4N3Đ",
-    price: 4500000,
-    duration_days: 4,
-    departures: "Đà Nẵng",
-    rating_score: 4.9,
-    rating_count: 256,
-    cover_image_url:
-      "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    slug: "phu-quoc",
-    name: "Phú Quốc 5N4Đ",
-    price: 6800000,
-    duration_days: 5,
-    departures: "TP.HCM",
-    rating_score: 4.6,
-    rating_count: 94,
-    cover_image_url:
-      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80",
-  },
-];
 
 export function Home() {
   const navigate = useNavigate();
-  const [tours, setTours] = useState(mockTours);
+  const { token } = useAuth();
+  const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searched, setSearched] = useState(false);
 
   useEffect(() => {
-    setTours(mockTours);
+    fetchTours({});
   }, []);
 
-  const handleSearch = async (filters) => {
+  const fetchTours = async (filters) => {
     setLoading(true);
     setError(null);
-    setSearched(true);
-
     try {
-      // TODO: Restore API call when backend is ready
-      // const params = new URLSearchParams();
-      // if (filters.q) params.append("q", filters.q);
-      // if (filters.departures) params.append("departures", filters.departures);
-      // if (filters.start_date) params.append("start_date", filters.start_date);
-      // if (filters.duration_days) params.append("duration_days", filters.duration_days);
-      // if (filters.min_price) params.append("min_price", filters.min_price);
-      // if (filters.max_price) params.append("max_price", filters.max_price);
-      // const url = `${API_BASE_URL}/api/v1/tours?${params.toString()}`;
-      // const response = await fetch(url);
-      // if (!response.ok) {
-      //   throw new Error(`API error: ${response.status}`);
-      // }
-      // const data = await response.json();
-      // setTours(data.data || []);
-
-      const filtered = mockTours.filter((tour) => {
-        if (filters.q) {
-          const query = filters.q.toLowerCase();
-          if (!tour.name.toLowerCase().includes(query)) return false;
-        }
-
-        if (filters.departures) {
-          if (tour.departures !== filters.departures) return false;
-        }
-
-        if (filters.duration_days) {
-          if (Number(tour.duration_days) !== Number(filters.duration_days)) {
-            return false;
-          }
-        }
-
-        if (filters.min_price) {
-          if (Number(tour.price) < Number(filters.min_price)) return false;
-        }
-
-        if (filters.max_price) {
-          if (Number(tour.price) > Number(filters.max_price)) return false;
-        }
-
-        return true;
-      });
-
-      setTours(filtered);
+      const params = new URLSearchParams();
+      if (filters.q) params.append("q", filters.q);
+      if (filters.departures) params.append("departures", filters.departures);
+      if (filters.start_date) params.append("start_date", filters.start_date);
+      if (filters.duration_days) params.append("duration_days", filters.duration_days);
+      if (filters.min_price) params.append("min_price", filters.min_price);
+      if (filters.max_price) params.append("max_price", filters.max_price);
+      const url = `${API_BASE_URL}/api/v1/tours?${params.toString()}`;
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const response = await fetch(url, { headers });
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      const data = await response.json();
+      setTours(data.data || data.result || []);
     } catch (err) {
       setError(err.message);
       setTours([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async (filters) => {
+    setSearched(true);
+    await fetchTours(filters);
   };
 
   const handleDetail = (slug) => {

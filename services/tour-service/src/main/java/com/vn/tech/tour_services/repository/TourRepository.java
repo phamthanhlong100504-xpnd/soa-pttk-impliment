@@ -13,6 +13,8 @@ import com.vn.tech.tour_services.entity.Tour;
 
 public interface TourRepository extends JpaRepository<Tour, UUID> {
 
+	java.util.Optional<Tour> findBySlug(String slug);
+
 	@Query(value = """
 		SELECT DISTINCT t.*
 		FROM tours t

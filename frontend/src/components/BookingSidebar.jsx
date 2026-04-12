@@ -1,15 +1,12 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "../styles/booking-sidebar.css";
 
 export function BookingSidebar({ tour, schedules, onBook }) {
   const [selectedScheduleId, setSelectedScheduleId] = React.useState(
-    schedules && schedules.length > 0 ? schedules[0].schedule_id : ""
+    schedules && schedules.length > 0 ? schedules[0].id : ""
   );
 
-  const selectedSchedule = schedules?.find(
-    (s) => s.schedule_id === selectedScheduleId
-  );
+  const selectedSchedule = schedules?.find((s) => s.id === selectedScheduleId);
 
   const handleBooking = () => {
     if (selectedSchedule) {
@@ -21,11 +18,13 @@ export function BookingSidebar({ tour, schedules, onBook }) {
     <aside className="booking-sidebar">
       <div className="booking-sidebar__card">
         {/* Rating */}
-        {tour?.rating_score && (
+        {tour?.averageRating && (
           <div className="booking-sidebar__rating">
-            <span className="booking-sidebar__stars">⭐ {tour.rating_score}</span>
+            <span className="booking-sidebar__stars">
+              ⭐ {Number(tour.averageRating).toFixed(1)}
+            </span>
             <span className="booking-sidebar__reviews">
-              ({tour.rating_count || 0} đánh giá)
+              ({tour.reviewCount || 0} đánh giá)
             </span>
           </div>
         )}
@@ -39,45 +38,49 @@ export function BookingSidebar({ tour, schedules, onBook }) {
                   style: "currency",
                   currency: "VND",
                 }).format(selectedSchedule.price)
+              : tour?.basePrice
+              ? new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(tour.basePrice)
               : "Liên hệ"}
           </span>
           <span className="booking-sidebar__price-unit">/khách</span>
         </div>
 
         {/* Schedule Select */}
-        {schedules && schedules.length > 0 && (
+        {schedules && schedules.length > 0 ? (
           <div className="booking-sidebar__schedule">
-            <label className="booking-sidebar__label">
-              Chọn ngày khởi hành
-            </label>
+            <label className="booking-sidebar__label">Chọn ngày khởi hành</label>
             <select
               value={selectedScheduleId}
               onChange={(e) => setSelectedScheduleId(e.target.value)}
               className="booking-sidebar__select"
             >
               {schedules.map((schedule) => (
-                <option key={schedule.schedule_id} value={schedule.schedule_id}>
-                  {new Date(schedule.start_date).toLocaleDateString("vi-VN")} (
-                  {schedule.available_slots || 0} chỗ trống)
+                <option key={schedule.id} value={schedule.id}>
+                  {new Date(schedule.start_date).toLocaleDateString("vi-VN")}
+                  {schedule.max_participants
+                    ? ` (${schedule.max_participants} chỗ)`
+                    : ""}
                 </option>
               ))}
             </select>
           </div>
+        ) : (
+          <p className="booking-sidebar__no-schedule">Hiện chưa có lịch khởi hành</p>
         )}
 
         {/* CTA Button */}
         <button
           className="booking-sidebar__btn"
           onClick={handleBooking}
-          disabled={!selectedScheduleId}
+          disabled={!selectedScheduleId || !schedules?.length}
         >
           Đặt Ngay →
         </button>
 
-        {/* Trust Badge */}
-        <div className="booking-sidebar__badge">
-          🛡️ Đặt chỗ an toàn & bảo mật
-        </div>
+        <div className="booking-sidebar__badge">🛡️ Đặt chỗ an toàn & bảo mật</div>
       </div>
     </aside>
   );

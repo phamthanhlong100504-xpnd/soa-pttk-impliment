@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { API_BASE_URL } from "../config/api";
 
 export function useApi(url, options = {}) {
   const [data, setData] = useState(null);
@@ -14,18 +13,15 @@ export function useApi(url, options = {}) {
       setLoading(true);
       setError(null);
       try {
-        // TODO: Restore API call when backend is ready
-        // const response = await fetch(`${API_BASE_URL}${url}`, {
-        //   headers: { "Content-Type": "application/json" },
-        //   ...options,
-        // });
-        // if (!response.ok) {
-        //   throw new Error(`API error: ${response.status}`);
-        // }
-        // const result = await response.json();
-        // setData(result);
-
-        setData(null);
+        const response = await fetch(`${API_BASE_URL}${url}`, {
+          headers: { "Content-Type": "application/json" },
+          ...options,
+        });
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        const result = await response.json();
+        setData(result);
       } catch (err) {
         setError(err.message);
       } finally {
