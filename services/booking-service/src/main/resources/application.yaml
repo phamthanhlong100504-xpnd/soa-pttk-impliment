@@ -1,36 +1,28 @@
 spring:
   application:
     name: booking-service
+
+  config:
+    import: "optional:file:.env[.properties]"
+
   datasource:
-#    url: ${DB_URL:jdbc:postgresql://localhost:5432/booking-db?currentSchema=booking_db}
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/booking_db?currentSchema=booking_db}
-    username: ${DB_USERNAME:postgres}
-#    password: ${DB_PASSWORD:123456}
-    password: 123456
+    url: ${DB_URL:jdbc:postgresql://db:5432/booking_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:123456}
     driver-class-name: org.postgresql.Driver
 
-#  jpa:
-#    properties:
-#      hibernate:
-#        type:
-#          json_format_mapper: jackson
   jpa:
-    # 2. Hiển thị log để bạn thấy nó đang tạo bảng
     show-sql: true
     generate-ddl: true
     hibernate:
-      # 3. Lệnh quan trọng để sinh bảng
       ddl-auto: update
     properties:
       hibernate:
-        # 4. Ép Dialect để Hibernate không phải đi đoán (sửa lỗi Dialect metadata)
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        # 5. Chỉ định schema mặc định để bảng không bị nhảy vào schema 'public'
-        default_schema: booking_db
         format_sql: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+    bootstrap-servers: ${KAFKA_BROKER:kafka:9092}
 
 server:
   port: ${BOOKING_SERVICE_PORT:8080}
@@ -38,7 +30,6 @@ server:
 eureka:
   client:
     service-url:
-#      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
-      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
   instance:
     prefer-ip-address: true

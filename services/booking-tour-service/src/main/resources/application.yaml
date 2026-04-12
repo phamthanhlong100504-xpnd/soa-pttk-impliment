@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_BOOKING_TOUR_PORT:8089}
+  port: ${SERVER_BOOKING_TOUR_PORT:8090}
 
 spring:
   application:
@@ -7,10 +7,10 @@ spring:
 
   temporal:
     connection:
-      target: 127.0.0.1:7233 # Địa chỉ của Temporal Server (Mặc định local)
+      target: ${TEMPORAL_URL:temporal:7233}
     namespace: default
     workers:
-      - task-queue: BookingTaskQueue # Phải khớp với tên khai báo ở @WorkflowImpl
+      - task-queue: BookingTaskQueue
         name: booking-worker
         capacity:
           max-concurrent-workflow-task-execution-size: 100
@@ -38,7 +38,6 @@ management:
 eureka:
   client:
     service-url:
-#      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
-      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+  instance:
     prefer-ip-address: true
-

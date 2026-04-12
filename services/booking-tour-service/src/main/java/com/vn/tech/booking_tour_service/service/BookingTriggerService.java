@@ -22,32 +22,6 @@ public class BookingTriggerService {
     private final WorkflowClient workflowClient;
     private final WorkflowServiceStubs workflowServiceStubs;
 
-//    // update
-//    public WorkflowResponse triggerUpdateBookingWorkflow(UUID tourScheduleId, String customerId, UUID slotBlockId, UUID bookingId, String paymentId, Long amount, String email) {
-//
-//        String workflowId = "BookingUpdate" + bookingId.toString();
-//
-//        WorkflowOptions options = WorkflowOptions.newBuilder()
-//            .setTaskQueue("BookingTaskQueue")
-//            .setWorkflowId("BookingUpdate-" + bookingId.toString()) // Đặt ID duy nhất để tránh chạy trùng lặp (Idempotency)
-//            .build();
-//
-//        BookingTaskWorkflow workflow = workflowClient.newWorkflowStub(BookingTaskWorkflow.class, options);
-//
-//        WorkflowClient.start(() -> workflow.updateBooking(
-//            tourScheduleId,
-//            customerId,
-//            slotBlockId,
-//            bookingId,
-//            paymentId,
-//            amount,
-//            email
-//        ));
-//
-//        System.out.println("[Booking Tour Orchestrator] [Update] : Đã đẩy lệnh xử lý Booking vào Temporal!");
-//        return new WorkflowResponse(workflowId,"PROCESSING","Yêu cầu đã được tiếp nhận và đang xử lý");
-//    }
-
     // get status
     public WorkflowStatusResponse getWorkflowStatus (String idempotencyKey) {
         String workflowId = "Booking-" + idempotencyKey;

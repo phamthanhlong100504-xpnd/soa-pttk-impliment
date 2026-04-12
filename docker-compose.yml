@@ -65,7 +65,7 @@ services:
     networks:
       - app-network
 
-  # ─── SERVICE TOUR (Đã chuyển sang dùng Postgres) ───────
+  # ─── SERVICE TOUR ─────────────────────────────────────
   tour-service:
     build: services/tour-service
     ports:
@@ -82,7 +82,7 @@ services:
     networks:
       - app-network
 
-  # ─── SERVICE INVENTORY (Đã chuyển sang dùng Postgres) ──
+  # ─── SERVICE INVENTORY ────────────────────────────────
   inventory-service:
     build: services/inventory-service
     ports:
@@ -172,7 +172,7 @@ services:
     networks:
       - app-network
 
-  # ─── DATABASE DUY NHẤT (POSTGRESQL) ──────────────────────
+  # ─── DATABASE ──────────────────────────────────────────
   db:
     image: postgres:16-alpine
     container_name: postgres-db

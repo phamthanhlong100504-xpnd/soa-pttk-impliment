@@ -65,7 +65,7 @@ public class BookingTicketController {
             headers.setContentLength(pdfBytes.length);
 
             // Sử dụng "attachment" để tải về máy
-            headers.setContentDispositionFormData("inline", "Bill_" + request.getCustomerName() + "_code" + request.getBookingId() + ".pdf");
+            headers.setContentDispositionFormData("inline", "Bill_" + request.getAccountId() + "_code" + request.getBookingId() + ".pdf");
 
             return ResponseEntity.ok()
                 .headers(headers)

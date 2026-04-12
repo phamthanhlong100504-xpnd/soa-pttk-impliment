@@ -11,8 +11,8 @@
       </not>
     </preConditions>
 
-    <createTable tableName="outbox">
-      <column name="id" type="UUID">
+    <createTable tableName="tbl_outbox">
+      <column name="id" type="uuid">
         <constraints primaryKey="true" nullable="false"/>
       </column>
 
@@ -41,7 +41,7 @@
       </column>
     </createTable>
 
-    <createIndex tableName="tbl_outbox" indexName="idx_outbox_status">
+    <createIndex indexName="idx_outbox_status" tableName="tbl_outbox">
       <column name="status"/>
     </createIndex>
   </changeSet>
