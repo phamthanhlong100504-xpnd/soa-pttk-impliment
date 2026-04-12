@@ -8,10 +8,10 @@ This is the frontend module of the microservices system. It provides the user in
 
 | Component        | Choice               |
 |------------------|----------------------|
-| Framework        | *(e.g., React, Vue, Angular, Svelte, plain HTML/JS)* |
-| Styling          | *(e.g., CSS, Tailwind, Bootstrap, Material UI)*       |
-| Package Manager  | *(e.g., npm, yarn, pnpm)*                             |
-| Build Tool       | *(e.g., Vite, Webpack, esbuild)*                      |
+| Framework        | React                |
+| Styling          | CSS                  |
+| Package Manager  | npm                  |
+| Build Tool       | Vite                 |
 
 ## Getting Started
 
@@ -19,10 +19,10 @@ This is the frontend module of the microservices system. It provides the user in
 # From project root
 docker compose up frontend --build
 
-# Or run locally (adapt to your stack)
-cd src/
-# npm install && npm run dev
-# yarn && yarn dev
+# Or run locally
+cd frontend
+npm install
+npm run dev
 ```
 
 ## Project Structure
