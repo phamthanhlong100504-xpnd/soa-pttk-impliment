@@ -1,9 +1,14 @@
 package com.vn.tech.booking_tour_service.activity;
 
 import com.vn.tech.booking_tour_service.dto.request.initiate.*;
+import com.vn.tech.booking_tour_service.dto.request.update.ConfirmBookingRequest;
+import com.vn.tech.booking_tour_service.dto.request.update.EmailRequest;
+import com.vn.tech.booking_tour_service.dto.request.update.UpdateSlotBlockRequest;
+
 import com.vn.tech.booking_tour_service.dto.response.initiate.BookingResponse;
 import com.vn.tech.booking_tour_service.dto.response.initiate.PaymentWebhookResponse;
 import com.vn.tech.booking_tour_service.dto.response.initiate.SlotBlockResponse;
+import com.vn.tech.booking_tour_service.dto.response.update.UpdateSlotBlockResponse;
 import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
 

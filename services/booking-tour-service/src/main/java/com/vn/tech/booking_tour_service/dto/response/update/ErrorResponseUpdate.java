@@ -6,16 +6,16 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-public class ErrorResponse extends ApiResponse{
-    public ErrorResponse() {
+public class ErrorResponseUpdate extends ApiResponseUpdate {
+    public ErrorResponseUpdate() {
         super(HttpStatus.BAD_REQUEST.value(), "Error");
     }
 
-    public ErrorResponse(String message) {
+    public ErrorResponseUpdate(String message) {
         super(HttpStatus.BAD_REQUEST.value(), message);
     }
 
-    public ErrorResponse(String message, Object data) {
+    public ErrorResponseUpdate(String message, Object data) {
         super(HttpStatus.BAD_REQUEST.value(), message, data);
     }
 

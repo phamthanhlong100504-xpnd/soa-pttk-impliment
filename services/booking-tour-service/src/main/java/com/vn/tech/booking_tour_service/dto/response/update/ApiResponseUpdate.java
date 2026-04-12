@@ -6,13 +6,13 @@ import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class ApiResponse extends ResponseEntity<ApiResponse.Payload> {
+public class ApiResponseUpdate extends ResponseEntity<ApiResponseUpdate.Payload> {
 
-    public ApiResponse(int code, String message) {
+    public ApiResponseUpdate(int code, String message) {
         super(new Payload(code, message, null), HttpStatus.OK);
     }
 
-    public ApiResponse(int code, String message, Object data) {
+    public ApiResponseUpdate(int code, String message, Object data) {
         super(new Payload(code, message, data), HttpStatus.OK);
     }
 

@@ -1,6 +1,6 @@
 package com.vn.tech.booking_tour_service.exception;
 
-import com.vn.tech.booking_tour_service.dto.ApiResponse;
+import com.vn.tech.booking_tour_service.dto.ApiResponseCreate;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,30 +17,30 @@ public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
 
     @ExceptionHandler(value = RuntimeException.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+    ResponseEntity<ApiResponseCreate> handlingRuntimeException(RuntimeException exception) {
         log.error("Exception: ", exception);
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponseCreate apiResponseCreate = new ApiResponseCreate();
 
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponseCreate.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        apiResponseCreate.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.badRequest().body(apiResponseCreate);
     }
 
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse> handlingAppException(AppException exception) {
+    ResponseEntity<ApiResponseCreate> handlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponseCreate apiResponseCreate = new ApiResponseCreate();
 
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
+        apiResponseCreate.setCode(errorCode.getCode());
+        apiResponseCreate.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponseCreate);
     }
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException exception) {
+    ResponseEntity<ApiResponseCreate> handlingValidation(MethodArgumentNotValidException exception) {
 
         var fieldError = exception.getFieldError();
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
@@ -59,15 +59,15 @@ public class GlobalExceptionHandler {
             } catch (IllegalArgumentException ignored) {}
         }
 
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(
+        ApiResponseCreate apiResponseCreate = new ApiResponseCreate();
+        apiResponseCreate.setCode(errorCode.getCode());
+        apiResponseCreate.setMessage(
             attributes != null
                 ? mapAttribute(errorCode.getMessage(), attributes)
                 : errorCode.getMessage()
         );
 
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.badRequest().body(apiResponseCreate);
     }
 
 

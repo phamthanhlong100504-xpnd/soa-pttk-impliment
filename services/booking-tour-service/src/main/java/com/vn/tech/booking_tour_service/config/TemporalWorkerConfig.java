@@ -1,9 +1,7 @@
 package com.vn.tech.booking_tour_service.config;
 
-import com.vn.tech.booking_tour_service.activity.BookingTaskActivities;
-import com.vn.tech.booking_tour_service.activity.BookingTaskActivitiesImpl;
-import com.vn.tech.booking_tour_service.service.BookingTourService;
-import com.vn.tech.booking_tour_service.workflow.BookingTaskWorkflowImpl;
+import com.vn.tech.booking_tour_service.activity.impl.BookingTaskActivitiesImpl;
+import com.vn.tech.booking_tour_service.workflow.impl.BookingTaskWorkflowImpl;
 import io.temporal.client.WorkflowClient;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;

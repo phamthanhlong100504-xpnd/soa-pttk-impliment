@@ -1,5 +1,6 @@
 package com.vn.tech.booking_tour_service.dto.response.initiate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vn.tech.booking_tour_service.common.BookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BookingResponse {
     private UUID id;
     private UUID accountId;

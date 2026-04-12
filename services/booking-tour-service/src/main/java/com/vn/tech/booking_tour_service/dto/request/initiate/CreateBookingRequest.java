@@ -21,4 +21,7 @@ public class CreateBookingRequest {
 
     List<PassengerRequest> passengerRequests;
     List<BookingOptionalServiceRequest>  bookingOptionalServiceRequests;
+
+    private String email;
+    private String idempotencyKey;
 }
