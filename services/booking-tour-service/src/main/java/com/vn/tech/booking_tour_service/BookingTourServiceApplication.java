@@ -11,7 +11,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 public class BookingTourServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BookingTourServiceApplication.class, args);
+        SpringApplication.run(BookingTourServiceApplication.class, args);
 	}
 
 }

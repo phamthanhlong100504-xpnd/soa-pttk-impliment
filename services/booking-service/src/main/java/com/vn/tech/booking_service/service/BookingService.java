@@ -102,6 +102,17 @@ public class BookingService {
         return returnBookingResponse(booking);
     }
 
+    @Transactional(readOnly = true)
+    public BookingResponse getBookingById(UUID bookingId) {
+        log.info("[controller] --> [service] Get booking: {}", bookingId);
+
+        BookingEntity booking = bookingRepository.findById(bookingId)
+            .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXIST));
+
+        log.info("[controller] --> [service] Get booking {} successfully", booking.getId());
+        return returnBookingResponse(booking);
+    }
+
 
     private void saveOutboxEvent(String aggregateType, UUID aggregateId, String eventType, Map<String,Object> payload) {
         OutboxEntity outbox = OutboxEntity.builder()
@@ -151,6 +162,7 @@ public class BookingService {
 
         BookingResponse bookingResponse = BookingResponse.builder()
             .id(booking.getId())
+            .bookingCode(booking.getBookingCode())
             .accountId(booking.getAccountId())
             .tourScheduleId(booking.getTourScheduleId())
             .tourName(booking.getTourName())

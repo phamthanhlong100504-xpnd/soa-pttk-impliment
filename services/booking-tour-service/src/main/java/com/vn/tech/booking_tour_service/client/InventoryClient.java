@@ -1,17 +1,22 @@
 package com.vn.tech.booking_tour_service.client;
 
-import com.vn.tech.booking_tour_service.dto.request.update.UpdateSlotBlockRequest;
-import com.vn.tech.booking_tour_service.dto.response.update.ApiResponse;
+import com.vn.tech.booking_tour_service.dto.InventoryApiResponse;
+import com.vn.tech.booking_tour_service.dto.request.initiate.SlotBlockRequest;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "inventory-service", path = "api/v1/inventory")
+@FeignClient(name = "inventory-service")
 public interface InventoryClient {
+    @GetMapping("api/v1/inventory/{tour-schedule-id}")
+    public InventoryApiResponse getAvailableSlot(@PathVariable("tour-schedule-id") String tourScheduleId);
 
-    @PutMapping("/slots-blocks")
-    // SỬA DÒNG NÀY: Trả về thẳng ResponseEntity với Payload bên trong
+    @PostMapping("api/v1/inventory/slot-blocks")
+    public InventoryApiResponse createSlotBlocks(@RequestBody SlotBlockRequest request);
+
+    @PutMapping("api/v1/inventory/slots-blocks")
     public ResponseEntity<ApiResponse.Payload> updateSlotsBlocks(@RequestBody UpdateSlotBlockRequest request);
 
 }
