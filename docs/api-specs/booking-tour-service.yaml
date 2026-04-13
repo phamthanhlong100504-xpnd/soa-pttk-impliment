@@ -7,7 +7,7 @@ info:
   title: Booking-Tour Service API (Orchestrator)
   description: |
     API specification for Booking-Tour Service.
-    This is a Task Service / Orchestrator that coordinates the entire tour booking workflow 
+    This is a Task Service / Orchestrator that coordinates the entire tour booking workflow
     using Temporal.io (Saga Pattern).
 
     **Workflow Steps:**
@@ -97,6 +97,7 @@ components:
         - email
         - idempotencyKey
         - passengers
+        - optionalServices
       properties:
         accountId:
           type: string

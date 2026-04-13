@@ -8,7 +8,6 @@ info:
   description: |
     API specification for Inventory Service.
     Manages tour slot availability, slot blocking (reservation hold), and slot confirmation.
-    Uses Optimistic Locking to prevent overbooking.
   version: 1.0.0
 
 servers:
@@ -52,7 +51,6 @@ paths:
         Tạm giữ chỗ cho khách hàng trong thời gian thanh toán.
         - Trạng thái: PENDING (chờ thanh toán)
         - Có TTL (expires_at) — tự động hết hạn nếu không thanh toán
-        - Sử dụng Optimistic Locking để chống overbooking
       requestBody:
         required: true
         content:
@@ -100,6 +98,9 @@ paths:
 
 components:
   schemas:
+    # ---------------------------------------------------------
+    # REQUEST SCHEMAS
+    # ---------------------------------------------------------
     SlotBlockRequest:
       type: object
       required:
@@ -138,26 +139,17 @@ components:
         slotBlockId:
           type: string
           format: uuid
-          description: ID của slot block cần confirm
+          description: ID của slot block cần xử lý
 
+    # ---------------------------------------------------------
+    # RESPONSE SCHEMAS
+    # ---------------------------------------------------------
     AvailableResponse:
       type: object
       properties:
-        tourScheduleId:
-          type: string
-          format: uuid
-        totalSlots:
-          type: integer
-          example: 30
         availableSlots:
           type: integer
           example: 25
-        blockedSlots:
-          type: integer
-          example: 3
-        confirmedSlots:
-          type: integer
-          example: 2
 
     SlotBlockResponse:
       type: object
@@ -165,33 +157,32 @@ components:
         slotBlockId:
           type: string
           format: uuid
-        tourScheduleId:
-          type: string
-          format: uuid
-        customerId:
-          type: string
-        quantity:
+        previousAvailableSlots:
           type: integer
-        status:
+          example: 30
+        newAvailableSlots:
+          type: integer
+          example: 28
+        amount:
+          type: integer
+          example: 2
+        actionType:
           type: string
-          enum: [PENDING, CONFIRMED, EXPIRED]
-        expiresAt:
-          type: string
-          format: date-time
+          example: "PENDING"
 
     UpdateSlotBlockResponse:
       type: object
       properties:
-        slotBlockId:
-          type: string
-          format: uuid
-        status:
-          type: string
-          example: CONFIRMED
         confirmedSlots:
           type: integer
-          description: Tổng số slot đã confirmed sau khi cập nhật
+          example: 2
+        actionType:
+          type: string
+          example: "CONFIRM_SLOT"
+        bookingId:
+          type: string
 
+#  các response trả về được bọc ngoài ApiResponse
     SuccessResponse_AvailableResponse:
       type: object
       properties:
