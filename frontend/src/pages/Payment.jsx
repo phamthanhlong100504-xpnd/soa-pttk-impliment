@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { API_BASE_URL } from "../config/api";
 import "../styles/payment.css";
 
 function formatVND(amount) {
@@ -15,34 +17,93 @@ const PAYMENT_METHODS = [
   { id: "momo", name: "MoMo", icon: "🔴", description: "Ví điện tử MoMo" },
 ];
 
+const POLL_INTERVAL = 2000;
+const POLL_MAX_ATTEMPTS = 15;
+
+function buildPassengerRequests(fullName, adults, children) {
+  const passengers = [];
+  for (let i = 0; i < adults; i++) {
+    passengers.push({
+      fullName: i === 0 ? fullName : `Người lớn ${i + 1}`,
+      dateOfBirth: "1990-01-01",
+      passengerType: "ADULT",
+    });
+  }
+  for (let i = 0; i < children; i++) {
+    passengers.push({
+      fullName: `Trẻ em ${i + 1}`,
+      dateOfBirth: "2015-01-01",
+      passengerType: "CHILD",
+    });
+  }
+  return passengers;
+}
+
 export function Payment() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { token, user } = useAuth();
   const bookingPayload = location.state || null;
 
   const [selectedMethod, setSelectedMethod] = useState("credit_card");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
 
   if (!bookingPayload) {
     navigate("/");
     return null;
   }
 
-  const handlePay = (e) => {
+  const handlePay = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+    setError(null);
 
-    // Demo flow — simulate short delay then navigate to success
-    setTimeout(() => {
-      const bookingCode = `BK${Date.now().toString().slice(-8)}`;
+    const idempotencyKey = crypto.randomUUID();
+
+    const body = {
+      idempotencyKey,
+      tourScheduleId: bookingPayload.schedule_id,
+      accountId: user?.id,
+      tourName: bookingPayload.tourName,
+      quantity: (bookingPayload.adults || 1) + (bookingPayload.children || 0),
+      totalPrice: bookingPayload.total_price,
+      email: bookingPayload.email,
+      passengerRequests: buildPassengerRequests(
+        bookingPayload.full_name,
+        bookingPayload.adults || 1,
+        bookingPayload.children || 0
+      ),
+      bookingOptionalServiceRequests: [],
+    };
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/booking-tour/booking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Lỗi tạo booking (${res.status})`);
+      }
+
+      // Demo: bỏ qua polling, navigate thẳng success
       navigate("/success", {
         state: {
           ...bookingPayload,
-          booking_code: bookingCode,
+          booking_code: idempotencyKey,
           payment_method: selectedMethod,
         },
       });
-    }, 1500);
+    } catch (err) {
+      setError(err.message);
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -91,9 +152,8 @@ export function Payment() {
             <section className="payment-methods">
               <h2>Chọn phương thức thanh toán</h2>
 
-              <div className="demo-note">
-                <strong>Demo:</strong> Đây là luồng mô phỏng, không có giao dịch thực tế.
-              </div>
+
+              {error && <div className="payment-error">{error}</div>}
 
               <form onSubmit={handlePay}>
                 <div className="methods-list">

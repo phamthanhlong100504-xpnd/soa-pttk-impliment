@@ -1,0 +1,139 @@
+.my-bookings-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-bookings-main {
+  flex: 1;
+  padding: 2rem 1rem;
+  background: #f5f5f5;
+}
+
+.my-bookings-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.my-bookings-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1a1a2e;
+}
+
+.my-bookings-loading,
+.my-bookings-error {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.my-bookings-error { color: #e53e3e; }
+
+.my-bookings-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.my-bookings-empty .btn-primary {
+  margin-top: 1rem;
+  padding: 0.6rem 1.5rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.booking-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.booking-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.booking-card__code {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+}
+
+.booking-card__status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status--pending  { background: #fef3c7; color: #92400e; }
+.status--confirmed { background: #d1fae5; color: #065f46; }
+.status--cancelled { background: #fee2e2; color: #991b1b; }
+
+.booking-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.booking-card__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.booking-card__row .label { color: #666; }
+.booking-card__row .value { font-weight: 500; color: #1a1a2e; }
+.booking-card__row .value.total { color: #f97316; font-weight: 700; }
+
+.booking-card__footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0;
+  margin-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-pdf {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-pdf:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.btn-pdf--download {
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.btn-pdf--download:hover:not(:disabled) {
+  background: #f0fdf4;
+}
+
+.btn-pdf:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

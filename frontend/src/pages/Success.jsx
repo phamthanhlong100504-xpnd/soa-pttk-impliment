@@ -1,7 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { API_BASE_URL } from "../config/api";
 import "../styles/success.css";
 
 function formatVND(amount) {
@@ -11,7 +13,9 @@ function formatVND(amount) {
 export function Success() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { token, user } = useAuth();
   const bookingPayload = location.state || null;
+  const [pdfLoading, setPdfLoading] = useState(null); // "view" | "download" | null
 
   useEffect(() => {
     if (!bookingPayload) {
@@ -20,6 +24,77 @@ export function Success() {
   }, [bookingPayload, navigate]);
 
   if (!bookingPayload) return null;
+
+  const buildPassengerList = () => {
+    const list = [];
+    for (let i = 0; i < (bookingPayload.adults || 1); i++) {
+      list.push({ fullName: i === 0 ? (bookingPayload.full_name || "") : `Người lớn ${i + 1}` });
+    }
+    for (let i = 0; i < (bookingPayload.children || 0); i++) {
+      list.push({ fullName: `Trẻ em ${i + 1}` });
+    }
+    return list;
+  };
+
+  const buildTicketPayload = () => ({
+    bookingId: bookingPayload.booking_code || "",
+    accountId: user?.id || null,
+    tourScheduleId: bookingPayload.schedule_id || null,
+    tourName: bookingPayload.tourName || "",
+    quantity: (bookingPayload.adults || 1) + (bookingPayload.children || 0),
+    confirmedSlots: (bookingPayload.adults || 1) + (bookingPayload.children || 0),
+    totalPrice: bookingPayload.total_price || 0,
+    passengers: buildPassengerList(),
+    optionalServices: [],
+  });
+
+  const handleViewPdf = async () => {
+    setPdfLoading("view");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/documents/booking-tickets/show-ticket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(buildTicketPayload()),
+      });
+      if (!res.ok) throw new Error("Không thể tạo PDF");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setPdfLoading(null);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setPdfLoading("download");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/v1/documents/booking-tickets/file-pdf-ticket`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(buildTicketPayload()),
+      });
+      if (!res.ok) throw new Error("Không thể tải PDF");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Ve_Tour_${bookingPayload.booking_code || "ticket"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setPdfLoading(null);
+    }
+  };
 
   return (
     <div className="success-wrapper">
@@ -137,6 +212,20 @@ export function Success() {
             </button>
             <button className="secondary-button" onClick={() => navigate("/")}>
               Khám phá thêm tour
+            </button>
+            <button
+              className="secondary-button"
+              onClick={handleViewPdf}
+              disabled={pdfLoading !== null}
+            >
+              {pdfLoading === "view" ? "Đang tạo PDF..." : "Xem vé (PDF)"}
+            </button>
+            <button
+              className="secondary-button"
+              onClick={handleDownloadPdf}
+              disabled={pdfLoading !== null}
+            >
+              {pdfLoading === "download" ? "Đang tải..." : "Tải vé về máy"}
             </button>
           </div>
         </div>

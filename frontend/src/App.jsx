@@ -7,6 +7,7 @@ import { BookingForm } from "./pages/BookingForm";
 import { Payment } from "./pages/Payment";
 import { Success } from "./pages/Success";
 import { Login } from "./pages/Login";
+import { MyBookings } from "./pages/MyBookings";
 import "./App.css";
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/booking/:slug" element={<BookingForm />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
