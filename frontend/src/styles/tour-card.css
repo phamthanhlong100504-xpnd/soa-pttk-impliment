@@ -1,0 +1,126 @@
+.tour-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.tour-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(31, 90, 76, 0.1);
+}
+
+.tour-card__image {
+  position: relative;
+  width: 100%;
+  padding-bottom: 66.67%;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.tour-card__image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tour-card__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tour-card__badge span {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.tour-card__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px;
+}
+
+.tour-card__meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.tour-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.tour-card__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+
+.tour-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.tour-card__price {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tour-card__price-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.tour-card__price-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.tour-card__btn {
+  background: rgba(31, 90, 76, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(31, 90, 76, 0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tour-card__btn:hover {
+  background: rgba(31, 90, 76, 0.2);
+}

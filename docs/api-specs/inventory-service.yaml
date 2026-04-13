@@ -1,0 +1,220 @@
+# ============================================
+# Inventory Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Inventory Service API
+  description: |
+    API specification for Inventory Service.
+    Manages tour slot availability, slot blocking (reservation hold), and slot confirmation.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8083
+    description: Local development
+  - url: http://inventory-service:8083
+    description: Docker Compose network
+
+paths:
+  /api/v1/inventory/{tour-schedule-id}:
+    get:
+      summary: Lấy số chỗ trống
+      operationId: getAvailableSlot
+      tags:
+        - Inventory
+      description: Kiểm tra số slot available, blocked, confirmed của một tour schedule
+      parameters:
+        - name: tour-schedule-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lấy ra số lượng còn trống thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse_AvailableResponse'
+        '404':
+          description: Tour schedule không tồn tại
+
+  /api/v1/inventory/slot-blocks:
+    post:
+      summary: Tạo slot block (giữ chỗ)
+      operationId: createSlotBlock
+      tags:
+        - Slot Block
+      description: |
+        Tạm giữ chỗ cho khách hàng trong thời gian thanh toán.
+        - Trạng thái: PENDING (chờ thanh toán)
+        - Có TTL (expires_at) — tự động hết hạn nếu không thanh toán
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotBlockRequest'
+      responses:
+        '200':
+          description: Tạo slot block thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse_SlotBlockResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '409':
+          description: Không đủ chỗ trống (overbooking prevented)
+
+  /api/v1/inventory/slots-blocks:
+    put:
+      summary: Cập nhật slot block (xác nhận giữ chỗ)
+      operationId: updateSlotBlock
+      tags:
+        - Slot Block
+      description: |
+        Chuyển slot block từ PENDING sang CONFIRMED sau khi thanh toán thành công.
+        Cập nhật confirmed_slots trong Inventory.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSlotBlockRequest'
+      responses:
+        '200':
+          description: Cập nhật slot block thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse_UpdateSlotBlockResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '404':
+          description: Slot block không tồn tại
+
+components:
+  schemas:
+    # ---------------------------------------------------------
+    # REQUEST SCHEMAS
+    # ---------------------------------------------------------
+    SlotBlockRequest:
+      type: object
+      required:
+        - tourScheduleId
+        - customerId
+        - amount
+        - bookingId
+      properties:
+        tourScheduleId:
+          type: string
+          format: uuid
+          description: ID của tour schedule cần giữ chỗ
+        customerId:
+          type: string
+          description: ID khách hàng
+        amount:
+          type: integer
+          description: Số lượng chỗ cần giữ
+          example: 2
+        bookingId:
+          type: string
+          description: ID đơn đặt tour liên quan
+
+    UpdateSlotBlockRequest:
+      type: object
+      required:
+        - tourScheduleId
+        - customerId
+        - slotBlockId
+      properties:
+        tourScheduleId:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+        slotBlockId:
+          type: string
+          format: uuid
+          description: ID của slot block cần xử lý
+
+    # ---------------------------------------------------------
+    # RESPONSE SCHEMAS
+    # ---------------------------------------------------------
+    AvailableResponse:
+      type: object
+      properties:
+        availableSlots:
+          type: integer
+          example: 25
+
+    SlotBlockResponse:
+      type: object
+      properties:
+        slotBlockId:
+          type: string
+          format: uuid
+        previousAvailableSlots:
+          type: integer
+          example: 30
+        newAvailableSlots:
+          type: integer
+          example: 28
+        amount:
+          type: integer
+          example: 2
+        actionType:
+          type: string
+          example: "PENDING"
+
+    UpdateSlotBlockResponse:
+      type: object
+      properties:
+        confirmedSlots:
+          type: integer
+          example: 2
+        actionType:
+          type: string
+          example: "CONFIRM_SLOT"
+        bookingId:
+          type: string
+
+#  các response trả về được bọc ngoài ApiResponse
+    SuccessResponse_AvailableResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: "Success! Lấy ra số lượng còn trống"
+        data:
+          $ref: '#/components/schemas/AvailableResponse'
+
+    SuccessResponse_SlotBlockResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: "Success! Tạo slot-blocks thành công"
+        data:
+          $ref: '#/components/schemas/SlotBlockResponse'
+
+    SuccessResponse_UpdateSlotBlockResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: "Success! Cập nhật slot-blocks thành công"
+        data:
+          $ref: '#/components/schemas/UpdateSlotBlockResponse'

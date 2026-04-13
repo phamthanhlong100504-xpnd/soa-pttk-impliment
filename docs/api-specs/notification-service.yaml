@@ -7,41 +7,27 @@ info:
   title: Notification Service API
   description: |
     API specification for Notification Service.
-    Handles email, SMS, and push notifications.
+    Handles sending booking confirmation emails with tour details using SMTP (JavaMailSender + Thymeleaf templates).
+    Runs asynchronously via Spring @Async.
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8085
     description: Local development
-  - url: http://notification-service:8080
-    description: Docker Compose development
+  - url: http://notification-service:8085
+    description: Docker Compose network
 
 paths:
-  /health:
-    get:
-      summary: Health check
-      operationId: healthCheck
-      tags:
-        - Health
-      responses:
-        '200':
-          description: Service is healthy
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
-
-  /api/v1/emails/send:
+  /api/v1/notifications/booking-tickets/send:
     post:
-      summary: Send email notification
-      operationId: sendEmail
+      summary: Gửi email xác nhận đặt tour
+      operationId: sendBookingConfirmationEmail
       tags:
-        - Emails
-      description: Send an email to a recipient with the provided name and message
+        - Notification
+      description: |
+        Gửi email xác nhận đặt tour cho khách hàng.
+        Email chứa thông tin booking: mã vé, tên tour, số lượng, danh sách hành khách, dịch vụ tùy chọn, tổng giá.
+        Sử dụng Thymeleaf template (confirmation.html) để render nội dung email HTML.
       requestBody:
         required: true
         content:
@@ -50,97 +36,115 @@ paths:
               $ref: '#/components/schemas/EmailRequest'
       responses:
         '200':
-          description: Email sent successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmailResponse'
-        '400':
-          description: Bad request - invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /api/v1/notifications/test:
-    get:
-      summary: Test endpoint
-      operationId: testNotification
-      tags:
-        - Notifications
-      responses:
-        '200':
-          description: Test successful
+          description: Email đã được đưa vào hàng đợi gửi thành công
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
                   status:
                     type: string
-                  service:
+                    example: success
+                  message:
                     type: string
+                    example: "Email đã được đưa vào hàng đợi gửi thành công"
+                  bookingId:
+                    type: string
+                    example: "BK-20260501-001"
+        '400':
+          description: Email người nhận không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Lỗi hệ thống khi gửi mail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
     EmailRequest:
       type: object
       required:
-        - email
-        - name
+        - toEmail
         - subject
-        - message
+        - bookingId
       properties:
-        email:
+        toEmail:
           type: string
           format: email
-          description: Recipient email address
-          example: user@example.com
-        name:
+          description: Email người nhận
+          example: customer@example.com
+        customerName:
           type: string
-          description: Name of the recipient
-          example: Nguyễn Văn A
+          description: Tên khách hàng
+          example: "Nguyễn Văn A"
         subject:
           type: string
-          description: Email subject
-          example: Xác nhận đơn hàng
-        message:
+          description: Tiêu đề email
+          example: "Đặt chỗ tour du lịch"
+        bookingId:
           type: string
-          description: Email message content
-          example: Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn sẽ được gửi sớm.
+          description: Mã đơn đặt tour
+          example: "BK-20260501-001"
+        accountId:
+          type: string
+          format: uuid
+        tourScheduleId:
+          type: string
+          format: uuid
+        tourName:
+          type: string
+          example: "Tour Đà Nẵng - Hội An 3N2Đ"
+        quantity:
+          type: integer
+          example: 2
+        confirmedSlots:
+          type: integer
+          description: Số chỗ đã xác nhận
+          example: 2
+        totalPrice:
+          type: integer
+          format: int64
+          example: 5990000
+        passengers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassengerResponse'
+        optionalServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingOptionalServiceResponse'
 
-    EmailResponse:
+    PassengerResponse:
       type: object
       properties:
-        status:
+        fullName:
           type: string
-          enum: [success, error]
-          example: success
-        message:
+          example: "Nguyễn Văn A"
+
+    BookingOptionalServiceResponse:
+      type: object
+      properties:
+        serviceName:
           type: string
-          example: Email đã được gửi thành công
-        email:
+          example: "Bảo hiểm du lịch"
+        quantity:
+          type: integer
+          example: 2
+        priceType:
           type: string
-          example: user@example.com
-        name:
-          type: string
-          example: Nguyễn Văn A
+          example: "PER_PERSON"
 
     ErrorResponse:
       type: object
       properties:
         status:
           type: string
-          enum: [error]
           example: error
         message:
           type: string
-          example: Email không được để trống
+          example: "Email người nhận không được để trống"

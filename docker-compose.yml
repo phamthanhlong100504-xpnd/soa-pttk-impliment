@@ -4,14 +4,16 @@
 
 services:
   # ─── Frontend ────────────────────────────────────
-#  frontend:
-#    build: ./frontend
-#    ports:
-#      - "${FRONTEND_PORT:-3000}:3000"
-#    depends_on:
-#      - gateway
-#    networks:
-#      - app-network
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    environment:
+      - VITE_API_BASE_URL=http://kong:8000
+    depends_on:
+      - kong
+    networks:
+      - app-network
 
   # ─── API Gateway (KONG) ─────────────────────────────────
   kong:
@@ -41,7 +43,7 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8080 # <-- Cố định port bên trong container
+      - SERVER_PORT=8080 
       - DB_URL=jdbc:postgresql://db:5432/${DB_BOOKING_NAME:-booking_db}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
@@ -58,7 +60,7 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8081 # <-- Cố định port bên trong container
+      - SERVER_PORT=8081 
       - DB_URL=jdbc:postgresql://db:5432/${DB_ACCOUNT_NAME:-account_db}
       - JWT_SECRET=${JWT_SECRET_KEY}
     depends_on:
@@ -75,9 +77,10 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8082 # <-- Cố định port bên trong container
+      - SERVER_PORT=8082 
       - DB_URL=jdbc:postgresql://db:5432/${DB_TOUR_NAME:-tour_db}
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
       db:
         condition: service_healthy
@@ -92,7 +95,7 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8083 # <-- Cố định port bên trong container
+      - SERVER_PORT=8083 
       - DB_URL=jdbc:postgresql://db:5432/${DB_INVENTORY_NAME:-inventory_db}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     depends_on:
@@ -109,7 +112,7 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8090 # <-- Cố định port bên trong container
+      - SERVER_PORT=8090 
       - TEMPORAL_URL=temporal:7233
     depends_on:
       - temporal
@@ -154,7 +157,7 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8084 # <-- Cố định port bên trong container
+      - SERVER_PORT=8084 
     networks:
       - app-network
 
@@ -165,7 +168,7 @@ services:
     env_file:
       - .env
     environment:
-      - SERVER_PORT=8085 # <-- Cố định port bên trong container
+      - SERVER_PORT=8085 
     networks:
       - app-network
 
