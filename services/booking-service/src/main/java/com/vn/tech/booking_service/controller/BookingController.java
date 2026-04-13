@@ -36,8 +36,8 @@ public class BookingController {
             .build();
     }
 
-    @GetMapping()
-    public ApiResponse<BookingResponse> getBooking(@RequestParam UUID id) {
+    @GetMapping("/{bookingId}")
+    public ApiResponse<BookingResponse> getBooking(@PathVariable("bookingId") UUID id) {
         return ApiResponse.<BookingResponse>builder()
             .code(200)
             .message("Lấy Booking thành công")

@@ -27,7 +27,7 @@
 | Method | Endpoint | Mô tả | Auth |
 |--------|----------|-------|------|
 | `POST` | `/api/v1/bookings` | Tạo booking mới | ✅ JWT |
-| `GET` | `/api/v1/bookings?id={id}` | Lấy booking theo ID | ✅ JWT |
+| `GET` | `/api/v1/bookings/{bookingId}` | Lấy booking theo ID | ✅ JWT |
 | `POST` | `/api/v1/bookings/confirm` | Xác nhận booking | ✅ JWT |
 | `POST` | `/api/v1/payments/webhook` | Nhận webhook thanh toán | ❌ Public |
 | `GET` | `/health` | Health check | ❌ Public |
@@ -81,7 +81,29 @@ curl -X POST http://localhost:8000/api/v1/bookings \
 | `dateOfBirth` | LocalDate | Ngày sinh |
 | `passengerType` | Enum | `ADULT` / `CHILD` / `INFANT` |
 
+### BookingOptionalServiceEntity (`tbl_passengers`)
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `id` | UUID | Primary key |
+| `bookingId` | UUID | FK → booking |
+| `optionalServiceId` | UUID | ID của dịch vụ tùy chọn |
+| `serviceName` | String | Tên dịch vụ tại thời điểm đặt |
+| `quantity` | int | Số lượng dịch vụ đã chọn |
+| `priceType` | String | Loại giá (ví dụ: Per Person| Per Group| Per Day) |
+| `unitPrice` | Long | Đơn giá của dịch vụ |
+| `totalPrice` | Long | Tổng tiền cho dịch vụ |
+
 ### PaymentRecordEntity
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `id` | UUID | Primary key |
+| `bookingId` | UUID | FK → booking |
+| `paymentId` | String | ID của dịch vụ tùy chọn |
+| `idempotencyKey` | String | Khóa duy nhất để tránh xử lý thanh toán trùng lặp |
+| `amount` | Long | Số tiền thanh toán |
+| `status` | Enum | Trạng thái thanh toán (ví dụ: PENDING, SUCCESS, FAILED) |
 
 > Lưu lịch sử giao dịch thanh toán liên kết với booking.
 

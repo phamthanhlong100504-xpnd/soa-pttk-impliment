@@ -54,7 +54,7 @@ services:
               minute: 30
               policy: local
 
-      - name: payos-webhook-public-route
+      - name: payment-webhook-public-route
         paths:
           - /api/v1/payments
         methods:
