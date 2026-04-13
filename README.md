@@ -14,7 +14,7 @@
 | Name | Student ID | Role | Contribution |
 |------|------------|------|--------------|
 |   Phạm Thành Long   |    B22DCCN505        |      |   Booking-Tour-Service (Update flow), Inventory-Service, Notification-Service, Document-Service |
-|   Đào Đức Duy  |   B22DCCN145 |  |  Booking-Tour-Service (Create flow), Booking-Service, Account Service | 
+|   Đào Đức Duy  |   B22DCCN145 |  |  Booking-Tour-Service (Create flow), Booking-Service, Account Service, Kong Gateway | 
 | Nguyễn Quang Dũng | B22DCCN133 |    |  Tour-Service, FontEnd|
 
 ---
