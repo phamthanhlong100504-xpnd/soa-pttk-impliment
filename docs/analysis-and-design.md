@@ -18,7 +18,7 @@ Describe or diagram the high-level Business Process to be automated.
 
 - **Domain**: Du lịch (Tourism / Travel)
 - **Business Process**: Đặt tour du lịch trực tuyến (Online Tour Booking)
-- **Actors**: Khách hàng (Customer), Hệ thống thanh toán (Payment Gateway — PayOS), Quản trị viên (Admin)
+- **Actors**: Khách hàng (Customer), Hệ thống thanh toán (Payment Gateway — PayOS)
 - **Scope**: Quy trình từ khi khách hàng tìm kiếm tour, chọn lịch trình, đặt chỗ, thanh toán, xác nhận đặt tour, đến khi nhận vé điện tử qua email.
 
 **Process Diagram:**
@@ -27,19 +27,13 @@ Describe or diagram the high-level Business Process to be automated.
 
 ### 1.2 Existing Automation Systems
 
-| System Name | Type | Current Role | Interaction Method |
-|-------------|------|--------------|-------------------|
-| PayOS | Payment Gateway | Xử lý thanh toán trực tuyến | REST API / Webhook |
-
-> Ngoài PayOS, quy trình được thiết kế mới hoàn toàn từ đầu dưới dạng microservices.
-
 ### 1.3 Non-Functional Requirements
 
 Non-functional requirements serve as input for identifying Utility Service and Microservice Candidates in step 2.7.
 
 | Requirement    | Description |
 |----------------|-------------|
-| Performance    | Thời gian phản hồi API < 2s. Hệ thống xử lý workflow đặt tour bất đồng bộ qua Temporal để không block request. |
+| Performance    | Hệ thống xử lý workflow đặt tour bất đồng bộ qua Temporal để không block request. |
 | Security       | JWT-based authentication (HS256). Kong API Gateway bảo vệ endpoint bằng JWT plugin. Mật khẩu hash bằng BCrypt. |
 | Scalability    | Mỗi service có thể scale độc lập. Database per service pattern. Service discovery qua Eureka. |
 | Availability   | Temporal đảm bảo workflow reliability — tự retry khi activity fail. SlotBlock có TTL tự động giải phóng chỗ bị "treo". Optimistic Locking chống overbooking. |
@@ -127,7 +121,7 @@ Map entities/processes to REST URI Resources.
 | Booking Service | Lấy booking | `/api/v1/bookings/{bookingId}` | GET |
 | Booking Service | Xử lý payment webhook | `/api/v1/payments/webhook` | POST |
 | Booking-Tour Service | Khởi tạo workflow đặt tour | `/api/v1/booking-tour/booking` | POST |
-| Booking-Tour Service | Kiểm tra trạng thái workflow | `/api/v1/booking-tour/status/{key}` | GET |
+| Booking-Tour Service | Kiểm tra trạng thái workflow | `/api/v1/booking-tour/status/{idempotencyKey}` | GET |
 | Document Service | Render vé PDF (inline) | `/api/v1/documents/booking-tickets/show-ticket` | POST |
 | Document Service | Tải vé PDF | `/api/v1/documents/booking-tickets/file-pdf-ticket` | POST |
 | Notification Service | Gửi email xác nhận | `/api/v1/notifications/booking-tickets/send` | POST |

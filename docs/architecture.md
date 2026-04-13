@@ -59,8 +59,9 @@ Select patterns based on business/technical justifications from your analysis.
 |-----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | **Frontend** | — | — | — | — | — | — | — | REST | — |
 | **Kong Gateway** | REST | REST | REST | REST | REST | REST | — | — | — |
-| **Booking-Tour** | — | — | REST (internal) | REST (internal) | — | REST (internal) | REST (internal) | — | Eureka |
-| **Inventory** | — | — | — | — | — | — | REST (internal) | — | Eureka |
+| **Booking-Tour** | — | — | REST (internal) | REST (internal) | — | — | REST (internal) | — | Eureka |
+| **Inventory** | — | — | — | — | REST (internal) | — | — | — | Eureka |
+| **Booking** | — | — | — | — | REST (internal)  | — | — | — | Eureka |
 | **All Services** | — | — | — | — | — | — | — | — | Register |
 
 **Communication protocols:**
@@ -74,7 +75,7 @@ Select patterns based on business/technical justifications from your analysis.
 
 ## 4. Architecture Diagram
 
-[asset\architecture.png](asset\architecture.png)
+[asset\architecture.png](asset/architecture.png)
 
 ---
 
