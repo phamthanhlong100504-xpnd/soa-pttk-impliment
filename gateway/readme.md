@@ -14,14 +14,17 @@ The API Gateway serves as the single entry point for all client requests. It rou
 
 | Component  | Choice             |
 |------------|--------------------|
-| Approach   | *(e.g., Nginx, Express, FastAPI, Kong, Traefik)* |
+| Approach   | Kong |
 
 ## Routing Table
 
 | External Path        | Target Service | Internal URL                   |
 |----------------------|----------------|--------------------------------|
-| `/api/service-a/*`   | Service A      | `http://service-a:5000/*`      |
-| `/api/service-b/*`   | Service B      | `http://service-b:5000/*`      |
+| `/api/v1/bookings/*`   | Booking Service     | `http://booking-service:8080/*`      |
+| `/api/v1/accounts/*`   | Account Service     | `http://account-service:8081/*`      |
+| `/api/v1/tours/*`   | Tour Service     | `http://tour-service:8082/*`      |
+| `/api/v1/inventory/*`   | Inventory Service     | `http://inventory-service:8083/*`      |
+| `/api/v1/booking-tour-service/*`   | Inventory Service     | `http://booking-tour-service:8090/*`      |
 
 ## Running
 
