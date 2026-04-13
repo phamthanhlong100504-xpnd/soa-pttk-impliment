@@ -4,56 +4,38 @@
 
 services:
   # ─── Frontend ────────────────────────────────────
-#  frontend:
-#    build: ./frontend
-#    ports:
-#      - "${FRONTEND_PORT:-3000}:3000"
-#    depends_on:
-#      - gateway
-#    networks:
-#      - app-network
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-3001}:3000"
+    environment:
+      - VITE_API_BASE_URL=http://kong:8000
+    depends_on:
+      - kong
+    networks:
+      - app-network
 
-  # ─── API Gateway ─────────────────────────────────
-#  gateway:
-#    build: ./gateway
-#    ports:
-#      - "${GATEWAY_PORT:-8080}:8000"
-#    depends_on:
-#      - service-a
-#      - service-b
-#    networks:
-#      - app-network
+  # ─── API Gateway (KONG) ─────────────────────────────────
+  kong:
+    build: ./gateway
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+      KONG_PLUGINS: bundled
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PLUGINS_EUREKA_CONFIG_EUREKA_URL: ${EUREKA_URL}
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    volumes:
+      - ./gateway/kong.yml:/usr/local/kong/declarative/kong.yml
+    depends_on:
+      - eureka-server
+    networks:
+      - app-network
 
-  # ─── Shared Infrastructure (uncomment as needed) ─
-  # db:
-  #   image: postgres:16-alpine    # or mysql:8, mongo:7, etc.
-  #   ports:
-  #     - "${DB_PORT:-5432}:5432"
-  #   environment:
-  #     POSTGRES_DB: ${DB_NAME:-mydb}
-  #     POSTGRES_USER: ${DB_USER:-admin}
-  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   networks:
-  #     - app-network
-
-  # redis:
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
-  #   networks:
-  #     - app-network
-
-  # rabbitmq:
-  #   image: rabbitmq:3-management-alpine
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-  #   networks:
-  #     - app-network
-
-  # ─── Service Booking ───────────────────────────────────
+  # ─── SERVICE BOOKING ────────────────────────────────────
   booking-service:
     build: services/booking-service
     ports:
@@ -61,29 +43,16 @@ services:
     env_file:
       - .env
     environment:
-      - DB_URL=jdbc:postgresql://booking-db:5432/${DB_BOOKING_NAME:-booking_db}
+      - SERVER_PORT=8080 
+      - DB_URL=jdbc:postgresql://db:5432/${DB_BOOKING_NAME:-booking_db}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_JPA_SHOW_SQL=true
     depends_on:
-      - booking-db
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
-  booking-db:
-    image: postgres:16-alpine
-    ports:
-      - "${DB_BOOKING_SERVICE_PORT:-5432}:5432"
-    environment:
-      POSTGRES_DB: ${DB_BOOKING_NAME:-booking_db}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
-    volumes:
-      - booking-db-data:/var/lib/postgresql/data
-    command: ["postgres", "-c", "wal_level=logical"]
-    networks:
-      - app-network
-
-  # ─── Service ACCOUNT ───────────────────────────────────
+  # ─── SERVICE ACCOUNT ────────────────────────────────────
   account-service:
     build: services/account-service
     ports:
@@ -91,94 +60,214 @@ services:
     env_file:
       - .env
     environment:
-      - DB_URL=jdbc:postgresql://account-db:5432/${DB_ACCOUNT_NAME:-account_db}
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_JPA_SHOW_SQL=true
+      - SERVER_PORT=8081 
+      - DB_URL=jdbc:postgresql://db:5432/${DB_ACCOUNT_NAME:-account_db}
       - JWT_SECRET=${JWT_SECRET_KEY}
-      - JWT_EXPIRATION_ACCESS=${JWT_EXPIRATION_ACCESS}
-      - JWT_EXPIRATION_REFRESH=${JWT_EXPIRATION_REFRESH}
     depends_on:
-      - account-db
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
-  account-db:
-    image: postgres:16-alpine
+  # ─── SERVICE TOUR ─────────────────────────────────────
+  tour-service:
+    build: services/tour-service
     ports:
-      - "${DB_ACCOUNT_SERVICE_PORT:-5433}:5432"
+      - "${TOUR_SERVICE_PORT:-8082}:8082"
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: ${DB_ACCOUNT_NAME:-account_db}
+      - SERVER_PORT=8082 
+      - DB_URL=jdbc:postgresql://db:5432/${DB_TOUR_NAME:-tour_db}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ─── SERVICE INVENTORY ────────────────────────────────
+  inventory-service:
+    build: services/inventory-service
+    ports:
+      - "${INVENTORY_SERVICE_PORT:-8083}:8083"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8083 
+      - DB_URL=jdbc:postgresql://db:5432/${DB_INVENTORY_NAME:-inventory_db}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ─── SERVICE BOOKING-TOUR (Temporal Client) ────────────
+  booking-tour-service:
+    build: services/booking-tour-service
+    ports:
+      - "${BOOKING_TOUR_SERVICE_PORT:-8090}:8090"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8090 
+      - TEMPORAL_URL=temporal:7233
+    depends_on:
+      - temporal
+    networks:
+      - app-network
+
+  # ─── TEMPORAL SERVER & UI ──────────────────────────────
+  temporal:
+    image: temporalio/auto-setup:1.23.1
+    container_name: temporal-server
+    ports:
+      - "7233:7233"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PWD=${DB_PASSWORD:-123456}
+      - POSTGRES_SEEDS=db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  temporal-ui:
+    image: temporalio/ui:2.21.3
+    container_name: temporal-ui
+    ports:
+      - "8091:8080"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    depends_on:
+      - temporal
+    networks:
+      - app-network
+
+  # ─── SERVICE DOCUMENT & NOTIFICATION ──────────────────
+  document-service:
+    build: services/document-service
+    ports:
+      - "${DOCUMENT_SERVICE_PORT:-8084}:8084"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8084 
+    networks:
+      - app-network
+
+  notification-service:
+    build: services/notification-service
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT:-8085}:8085"
+    env_file:
+      - .env
+    environment:
+      - SERVER_PORT=8085 
+    networks:
+      - app-network
+
+  # ─── SHARED INFRASTRUCTURE ──────────────────────────────
+  eureka-server:
+    build:
+      context: services/eureka-server
+    ports:
+      - "${EUREKA_SERVER_PORT:-8761}:8761"
+    environment:
+      - EUREKA_HOSTNAME=${EUREKA_SERVER_HOST:-localhost}
+    networks:
+      - app-network
+
+  # ─── DATABASE ──────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
+      POSTGRES_DB: postgres
+      POSTGRES_MULTIPLE_DATABASES: booking_db,account_db,tour_db,inventory_db,temporal
     volumes:
-      - account-db-data:/var/lib/postgresql/data
-    command: [ "postgres", "-c", "wal_level=logical" ]
+      - db-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    command: ["postgres", "-c", "wal_level=logical"]
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 
-  # ─── Shared Infrastructure
-  zookeeper:
-    image: confluentinc/cp-zookeeper:${ZOOKEEPER_VERSION:-7.5.0}
-    environment:
-      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT:-2181}
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - app-network
-
-  kafka:
-    image: confluentinc/cp-kafka:${KAFKA_VERSION:-7.5.0}
-    depends_on:
-      - zookeeper
-    ports:
-      - "${KAFKA_EXTERNAL_PORT:-29092}:29092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_PORT:-2181}
-
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT:-9092},PLAINTEXT_HOST://localhost:${KAFKA_EXTERNAL_PORT:-29092}
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-1}
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-1}
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-    networks:
-      - app-network
-
-  kafka-ui:
-    image: provectuslabs/kafka-ui:${KAFKA_UI_VERSION:-latest}
-    container_name: kafka-ui
-    ports:
-      - "${KAFKA_UI_PORT:-8989}:8080" # Truy cập qua http://localhost:8989
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_CLUSTERS_0_NAME: booking-cluster
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-      DYNAMIC_CONFIG_ENABLED: 'true'
-    networks:
-      - app-network
-
-  connect:
-    image: debezium/connect:${DEBEZIUM_VERSION:-2.5}
-    ports:
-      - "8083:8083"
-    environment:
-      BOOTSTRAP_SERVERS: kafka:9092
-      GROUP_ID: 1
-      CONFIG_STORAGE_TOPIC: my_connect_configs
-      OFFSET_STORAGE_TOPIC: my_connect_offsets
-      STATUS_STORAGE_TOPIC: my_connect_statuses
-      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-    depends_on:
-      - kafka
-      - booking-db
-    networks:
-      - app-network
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:${ZOOKEEPER_VERSION:-7.5.0}
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT:-2181}
+#      ZOOKEEPER_TICK_TIME: 2000
+#    networks:
+#      - app-network
+#
+#  kafka:
+#    image: confluentinc/cp-kafka:${KAFKA_VERSION:-7.5.0}
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "${KAFKA_EXTERNAL_PORT:-29092}:29092"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_PORT:-2181}
+#
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT:-9092},PLAINTEXT_HOST://localhost:${KAFKA_EXTERNAL_PORT:-29092}
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-1}
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_REPLICATION_FACTOR:-1}
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#    networks:
+#      - app-network
+#
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui:${KAFKA_UI_VERSION:-latest}
+#    container_name: kafka-ui
+#    ports:
+#      - "${KAFKA_UI_PORT:-8989}:8080" # Truy cập qua http://localhost:8989
+#    depends_on:
+#      - kafka
+#    environment:
+#      KAFKA_CLUSTERS_0_NAME: booking-cluster
+#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+#      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+#      DYNAMIC_CONFIG_ENABLED: 'true'
+#    networks:
+#      - app-network
+#
+#  connect:
+#    image: debezium/connect:${DEBEZIUM_VERSION:-2.5}
+#    ports:
+#      - "8087:8087"
+#    environment:
+#      BOOTSTRAP_SERVERS: kafka:9092
+#      GROUP_ID: 1
+#      CONFIG_STORAGE_TOPIC: my_connect_configs
+#      OFFSET_STORAGE_TOPIC: my_connect_offsets
+#      STATUS_STORAGE_TOPIC: my_connect_statuses
+#      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+#      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+#    depends_on:
+#      - kafka
+#      - booking-db
+#    networks:
+#      - app-network
 
 
 networks:
@@ -186,5 +275,4 @@ networks:
     driver: bridge
 
 volumes:
-  booking-db-data:
-  account-db-data:
+  db-data:

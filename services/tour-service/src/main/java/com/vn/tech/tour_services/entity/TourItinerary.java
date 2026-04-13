@@ -1,16 +1,10 @@
 package com.vn.tech.tour_services.entity;
 
 import java.util.UUID;
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -20,12 +14,10 @@ public class TourItinerary {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "VARCHAR(36)")
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "tour_id", columnDefinition = "VARCHAR(36)", nullable = false)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "tour_id", nullable = false)
     private UUID tourId;
 
     @Column(name = "day_number", nullable = false)
@@ -34,12 +26,14 @@ public class TourItinerary {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT") // Đổi từ LONGTEXT sang TEXT
     private String description;
 
-    @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON) // Hibernate 6 mapping JSON cho Postgres
+    @Column(columnDefinition = "jsonb")
     private String meals;
 
-    @Column(columnDefinition = "json")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
     private String activities;
 }

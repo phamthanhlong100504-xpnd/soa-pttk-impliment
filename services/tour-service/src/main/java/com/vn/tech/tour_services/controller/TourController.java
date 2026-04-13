@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vn.tech.tour_services.dto.ApiResponse;
-import com.vn.tech.tour_services.dto.TourDetailRequest;
 import com.vn.tech.tour_services.dto.TourDetailResponse;
 import com.vn.tech.tour_services.dto.TourSearchResponse;
 import com.vn.tech.tour_services.service.TourService;
@@ -74,13 +73,7 @@ public class TourController {
         UUID tourId = parseTourIdHeader(tourIdHeader);
         log.info("[tour-service] getTourDetail parsedHeaderTourId={}", tourId);
 
-        TourDetailRequest request = null;
-        if (tourId != null) {
-            request = new TourDetailRequest();
-            request.setTourId(tourId);
-        }
-
-        TourDetailResponse data = tourService.getTourDetail(slug, request);
+        TourDetailResponse data = tourService.getTourDetail(slug, tourId);
 
         log.info("[tour-service] getTourDetail response slug={}, tourId={}", slug, data.getTour() == null ? null : data.getTour().getId());
 

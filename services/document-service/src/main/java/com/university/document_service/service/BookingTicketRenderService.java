@@ -24,15 +24,21 @@ public class BookingTicketRenderService {
 
         Context context = new Context();
 
-        context.setVariable("bookingId", param.getBookingId()); // Bạn đang thiếu dòng này
-        context.setVariable("customerName", param.getCustomerName());
-        context.setVariable("email", param.getEmail());
-        context.setVariable("name_tour", param.getName_tour());
-        context.setVariable("start_date", param.getStart_date());
-        context.setVariable("end_date", param.getEnd_date());
-        context.setVariable("cost", param.getCost());
-        log.info("[BookingTicketRenderService] - Chi tiết thông tin : customerName : {}; email : {}; cost : {}; tourname : {}; startDate : {}; endDate : {}",
-            param.getCustomerName(),param.getEmail(), param.getCost(), param.getName_tour(),param.getStart_date(), param.getEnd_date());
+        // 1. Nạp các biến đơn lẻ
+        context.setVariable("bookingId", param.getBookingId());
+        context.setVariable("accountId", param.getAccountId());
+        context.setVariable("tourScheduleId", param.getTourScheduleId());
+        context.setVariable("tourName", param.getTourName());
+        context.setVariable("quantity", param.getQuantity());
+        context.setVariable("confirmedSlots", param.getConfirmedSlots());
+        context.setVariable("totalPrice", param.getTotalPrice());
+
+        // 2. Nạp CẢ DANH SÁCH (Rất quan trọng)
+        context.setVariable("passengers", param.getPassengers());
+        context.setVariable("optionalServices", param.getOptionalServices());
+
+        log.info("[BookingTicketRenderService] - Generate PDF cho Booking: {}, Tour: {}, Số lượng: {}",
+            param.getBookingId(), param.getTourName(), param.getQuantity());
 
         // 2. Build HTML String
         String html = templateEngine.process("booking_ticket", context);

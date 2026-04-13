@@ -1,0 +1,105 @@
+.header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header__container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--primary);
+}
+
+.logo__icon {
+  font-size: 1.5rem;
+}
+
+.nav {
+  display: flex;
+  gap: 32px;
+}
+
+.nav__link {
+  text-decoration: none;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+
+.nav__link:hover {
+  color: var(--primary);
+}
+
+.header__actions {
+  display: flex;
+  gap: 16px;
+}
+
+.header__user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header__username {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.header__login-btn,
+.header__logout-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  border: none;
+}
+
+.header__login-btn {
+  background: var(--primary, #3b82f6);
+  color: #fff;
+}
+
+.header__login-btn:hover {
+  background: #2563eb;
+}
+
+.header__logout-btn {
+  background: none;
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+}
+
+.header__logout-btn:hover {
+  background: var(--bg);
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+
+  .header__container {
+    padding: 0 16px;
+  }
+}

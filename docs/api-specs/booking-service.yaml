@@ -1,0 +1,321 @@
+# ============================================
+# Booking Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Booking Service API
+  description: |
+    API specification for Booking Service.
+    Handles booking creation, confirmation, retrieval, and payment webhook processing.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development
+  - url: http://booking-service:8080
+    description: Docker Compose network
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/v1/bookings:
+    post:
+      summary: Tạo booking mới
+      operationId: createBooking
+      tags:
+        - Booking
+      description: Tạo đơn đặt tour với trạng thái PENDING_PAYMENT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '200':
+          description: Tạo Booking thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_BookingResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+
+    get:
+      summary: Lấy booking theo ID
+      operationId: getBooking
+      tags:
+        - Booking
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lấy Booking thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_BookingResponse'
+        '404':
+          description: Booking không tồn tại
+
+  /api/v1/bookings/confirm:
+    post:
+      summary: Xác nhận booking
+      operationId: confirmBooking
+      tags:
+        - Booking
+      description: Cập nhật booking sang trạng thái CONFIRMED sau khi thanh toán thành công
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmBookingRequest'
+      responses:
+        '200':
+          description: Xác nhận Booking thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_BookingResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '404':
+          description: Booking không tồn tại
+
+  /api/v1/payments/webhook:
+    post:
+      summary: Xử lý payment webhook
+      operationId: handlePaymentWebhook
+      tags:
+        - Payment
+      description: Nhận webhook callback từ PayOS sau khi thanh toán
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentWebhookRequest'
+      responses:
+        '200':
+          description: Xử lý webhook thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_PaymentWebhookResponse'
+        '400':
+          description: Webhook data không hợp lệ
+
+components:
+  schemas:
+    CreateBookingRequest:
+      type: object
+      required:
+        - accountId
+        - tourScheduleId
+        - tourName
+        - quantity
+        - totalPrice
+        - passengers
+      properties:
+        accountId:
+          type: string
+          format: uuid
+        tourScheduleId:
+          type: string
+          format: uuid
+        tourName:
+          type: string
+          example: "Tour Đà Nẵng - Hội An 3N2Đ"
+        quantity:
+          type: integer
+          example: 2
+        totalPrice:
+          type: integer
+          format: int64
+          example: 5990000
+        passengers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassengerRequest'
+        optionalServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingOptionalServiceRequest'
+
+    PassengerRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          example: Nguyễn Văn A
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1995-01-15"
+        passengerType:
+          type: string
+          enum: [ADULT, CHILD, INFANT]
+          example: ADULT
+
+    BookingOptionalServiceRequest:
+      type: object
+      properties:
+        serviceName:
+          type: string
+          example: "Bảo hiểm du lịch"
+        quantity:
+          type: integer
+          example: 2
+        priceType:
+          type: string
+          example: "PER_PERSON"
+
+    ConfirmBookingRequest:
+      type: object
+      required:
+        - bookingId
+        - paymentId
+        - amount
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        paymentId:
+          type: string
+          example: "PAY-123456"
+        amount:
+          type: integer
+          format: int64
+          example: 5990000
+
+    PaymentWebhookRequest:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          format: uuid
+        paymentId:
+          type: string
+        status:
+          type: string
+          enum: [SUCCESS, FAILED]
+        amount:
+          type: integer
+          format: int64
+
+    BookingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        bookingCode:
+          type: string
+        accountId:
+          type: string
+          format: uuid
+        tourScheduleId:
+          type: string
+          format: uuid
+        tourName:
+          type: string
+        quantity:
+          type: integer
+        totalPrice:
+          type: integer
+          format: int64
+        bookingStatus:
+          type: string
+          enum: [PENDING_PAYMENT, CONFIRMED, CANCELLED]
+        paymentId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        passengers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassengerResponse'
+        optionalServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingOptionalServiceResponse'
+
+    PassengerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        passengerType:
+          type: string
+
+    BookingOptionalServiceResponse:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        quantity:
+          type: integer
+        priceType:
+          type: string
+
+    PaymentWebhookResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        status:
+          type: string
+
+    ApiResponse_BookingResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Tạo Booking thành công
+        result:
+          $ref: '#/components/schemas/BookingResponse'
+
+    ApiResponse_PaymentWebhookResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Xử lý webhook thành công
+        result:
+          $ref: '#/components/schemas/PaymentWebhookResponse'

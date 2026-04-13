@@ -1,0 +1,49 @@
+-- 0. Làm sạch toàn bộ dữ liệu theo đúng thứ tự ràng buộc
+TRUNCATE
+    inventory_history,
+    inventory,
+    slot_blocks,
+    tbl_outbox,
+    tour_schedules,
+    tours,
+    destinations,
+    departures
+CASCADE;
+
+-- 1. DỮ LIỆU NỀN (Destinations & Departures)
+INSERT INTO destinations (id, name, slug, country, region) VALUES
+('660f9511-f30c-52e5-b827-557766551001'::uuid, 'Nhật Bản', 'nhat-ban', 'Japan', 'Châu Á'),
+('660f9511-f30c-52e5-b827-557766551002'::uuid, 'Hàn Quốc', 'han-quoc', 'South Korea', 'Châu Á');
+
+INSERT INTO departures (id, name, slug) VALUES
+('660f9511-f30c-52e5-b827-557766552001'::uuid, 'Hà Nội', 'ha-noi');
+
+-- 2. BẢNG TOURS
+INSERT INTO tours (id, name, slug, destination_id, departure_id, base_price, status) VALUES
+('660f9511-f30c-52e5-b827-557766553001'::uuid, 'Tour Nhật Bản Sakura', 'japan-sakura', '660f9511-f30c-52e5-b827-557766551001'::uuid, '660f9511-f30c-52e5-b827-557766552001'::uuid, 35000000, 'ACTIVE'),
+('660f9511-f30c-52e5-b827-557766553002'::uuid, 'Tour Hàn Quốc Seoul', 'korea-seoul', '660f9511-f30c-52e5-b827-557766551002'::uuid, '660f9511-f30c-52e5-b827-557766552001'::uuid, 15000000, 'ACTIVE');
+
+-- 3. BẢNG TOUR_SCHEDULES (Lịch khởi hành)
+INSERT INTO tour_schedules (id, tour_id, code, start_date) VALUES
+('660f9511-f30c-52e5-b827-557766554001'::uuid, '660f9511-f30c-52e5-b827-557766553001'::uuid, 'JP-001', '2026-05-01'),
+('660f9511-f30c-52e5-b827-557766554002'::uuid, '660f9511-f30c-52e5-b827-557766553002'::uuid, 'KR-001', '2026-06-15');
+
+-- 4. BẢNG INVENTORY (Quản lý kho chỗ)
+-- Mỗi schedule có 50 slots, ngưỡng báo động (low_stock) là 5.
+INSERT INTO inventory (tour_schedule_id, tour_id, total_slots, available_slots, blocked_slots, confirmed_slots, low_stock_threshold, version, created_at) VALUES
+('660f9511-f30c-52e5-b827-557766554001'::uuid, '660f9511-f30c-52e5-b827-557766553001'::uuid, 50, 50, 0, 0, 5, 1, NOW()),
+('660f9511-f30c-52e5-b827-557766554002'::uuid, '660f9511-f30c-52e5-b827-557766553002'::uuid, 50, 50, 0, 0, 5, 1, NOW());
+
+-- 5. BẢNG INVENTORY_HISTORY (Lịch sử biến động kho)
+INSERT INTO inventory_history (id, tour_schedule_id, action_type, quantity_changed, previous_available_slots, new_available_slots, actor, note, created_at) VALUES
+(gen_random_uuid(), '660f9511-f30c-52e5-b827-557766554001'::uuid, 'INITIAL', 50, 0, 50, 'SYSTEM', 'Khởi tạo số lượng chỗ ban đầu', NOW()),
+(gen_random_uuid(), '660f9511-f30c-52e5-b827-557766554002'::uuid, 'INITIAL', 50, 0, 50, 'SYSTEM', 'Khởi tạo số lượng chỗ ban đầu', NOW());
+
+-- 6. BẢNG SLOT_BLOCKS (Giữ chỗ tạm thời)
+-- Giả sử khách hàng đang giữ 2 chỗ cho tour Nhật
+INSERT INTO slot_blocks (id, tour_schedule_id, customer_id, quantity, status, expires_at, created_at) VALUES
+('660f9511-f30c-52e5-b827-557766558001'::uuid, '660f9511-f30c-52e5-b827-557766554001'::uuid, gen_random_uuid(), 2, 'PENDING', NOW() + INTERVAL '15 minutes', NOW());
+
+-- 7. BẢNG TBL_OUTBOX (Dùng cho Event-driven/Microservices)
+INSERT INTO tbl_outbox (id, aggregate_type, aggregate_id, event_type, payload, status, created_at) VALUES
+(gen_random_uuid(), 'INVENTORY', '660f9511-f30c-52e5-b827-557766554001', 'StockInitialized', '{"schedule_id": "660f9511-f30c-52e5-b827-557766554001", "total": 50}', 'COMPLETED', NOW());

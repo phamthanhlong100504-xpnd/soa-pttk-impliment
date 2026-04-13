@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_BOOKING_TOUR_PORT:8090}
+
+spring:
+  application:
+    name: booking-tour-service
+
+  temporal:
+    connection:
+      target: ${TEMPORAL_URL:temporal:7233}
+    namespace: default
+    workers:
+      - task-queue: BookingTaskQueue
+        name: booking-worker
+        capacity:
+          max-concurrent-workflow-task-execution-size: 100
+          max-concurrent-activity-execution-size: 100
+
+logging:
+  level:
+    com:
+      openhtmltopdf: ERROR
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eureka-server:8761/eureka/}
+  instance:
+    prefer-ip-address: true

@@ -7,11 +7,8 @@ The API Gateway serves as the single entry point for all client requests. It rou
 ## Responsibilities
 
 - **Request routing**: Forward requests to the correct service
-- **Load balancing**: Distribute traffic (if applicable)
-- **Authentication**: Validate tokens/credentials (optional)
-- **Rate limiting**: Protect services from overload (optional)
-- **CORS handling**: Allow frontend cross-origin requests
-- **Request/Response transformation**: Modify headers, paths as needed
+- **Authentication**: Validate tokens/credentials
+- **Rate limiting**: Protect services from overload
 
 ## Tech Stack
 
@@ -41,4 +38,4 @@ service names defined in `docker-compose.yml` (e.g., `service-a`, `service-b`).
 ## Notes
 
 - Use service names (not `localhost`) for upstream URLs inside Docker
-- The gateway exposes port 8080 to the host
+- The gateway exposes port 8000 to the host

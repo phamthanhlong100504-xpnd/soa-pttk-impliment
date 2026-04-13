@@ -1,0 +1,172 @@
+# ============================================
+# Booking-Tour Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Booking-Tour Service API (Orchestrator)
+  description: |
+    API specification for Booking-Tour Service.
+    This is a Task Service / Orchestrator that coordinates the entire tour booking workflow
+    using Temporal.io (Saga Pattern).
+
+    **Workflow Steps:**
+    1. Validate tour schedule availability
+    2. Create booking (PENDING_PAYMENT)
+    3. Block inventory slots (PENDING)
+    4. Process payment
+    5. Confirm booking (CONFIRMED)
+    6. Update inventory slots (CONFIRMED)
+    7. Send email notification
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8090
+    description: Local development
+  - url: http://booking-tour-service:8090
+    description: Docker Compose network
+
+paths:
+  /api/v1/booking-tour/booking:
+    post:
+      summary: Khởi tạo workflow đặt tour
+      operationId: createBooking
+      tags:
+        - Booking Tour
+      description: |
+        Nhận yêu cầu đặt tour và khởi tạo Temporal Workflow bất đồng bộ.
+        Workflow sẽ chạy nền và điều phối các service: Inventory → Booking → Payment → Notification.
+        Sử dụng idempotencyKey để đảm bảo mỗi request chỉ tạo 1 workflow duy nhất.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '200':
+          description: Đã nhận được yêu cầu đặt tour — workflow đang chạy nền
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: "Đã nhận được yêu cầu đặt tour"
+        '400':
+          description: Dữ liệu không hợp lệ
+
+  /api/v1/booking-tour/status/{idempotencyKey}:
+    get:
+      summary: Kiểm tra trạng thái workflow
+      operationId: checkStatus
+      tags:
+        - Booking Tour
+      description: Kiểm tra trạng thái thực thi của workflow Temporal theo idempotency key
+      parameters:
+        - name: idempotencyKey
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Key duy nhất định danh workflow (workflow ID = "Booking-" + key)
+      responses:
+        '200':
+          description: Trạng thái workflow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowStatusResponse'
+        '404':
+          description: Workflow không tìm thấy
+
+components:
+  schemas:
+    CreateBookingRequest:
+      type: object
+      required:
+        - accountId
+        - tourScheduleId
+        - tourName
+        - quantity
+        - totalPrice
+        - email
+        - idempotencyKey
+        - passengers
+        - optionalServices
+      properties:
+        accountId:
+          type: string
+          format: uuid
+          description: ID tài khoản khách hàng
+        tourScheduleId:
+          type: string
+          format: uuid
+          description: ID lịch khởi hành
+        tourName:
+          type: string
+          example: "Tour Đà Nẵng - Hội An 3N2Đ"
+        quantity:
+          type: integer
+          example: 2
+        totalPrice:
+          type: integer
+          format: int64
+          example: 5990000
+        email:
+          type: string
+          format: email
+          description: Email nhận xác nhận đặt tour
+          example: "customer@example.com"
+        idempotencyKey:
+          type: string
+          description: Key chống tạo trùng workflow
+          example: "abc123-unique-key"
+        passengers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassengerRequest'
+        optionalServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingOptionalServiceRequest'
+
+    PassengerRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          example: "Nguyễn Văn A"
+        dateOfBirth:
+          type: string
+          format: date
+        passengerType:
+          type: string
+          enum: [ADULT, CHILD, INFANT]
+
+    BookingOptionalServiceRequest:
+      type: object
+      properties:
+        serviceName:
+          type: string
+        quantity:
+          type: integer
+        priceType:
+          type: string
+
+    WorkflowStatusResponse:
+      type: object
+      properties:
+        workflowId:
+          type: string
+          example: "Booking-abc123-unique-key"
+        status:
+          type: string
+          enum: [RUNNING, COMPLETED, FAILED, TIMED_OUT, CANCELLED]
+          example: COMPLETED
+        message:
+          type: string

@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -15,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.vn.tech.tour_services.dto.TourDetailRequest;
 import com.vn.tech.tour_services.dto.TourDetailResponse;
 import com.vn.tech.tour_services.dto.TourItineraryResponse;
 import com.vn.tech.tour_services.dto.TourResponse;
@@ -95,26 +93,32 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public TourDetailResponse getTourDetail(String slug, TourDetailRequest request) {
-        log.info("[tour-service] getTourDetail called with slug={}, headerTourId={}", slug, request == null ? null : request.getTourId());
+    public TourDetailResponse getTourDetail(String slug, UUID tourId) {
+        log.info("[tour-service] getTourDetail called with slug={}, headerTourId={}", slug, tourId);
 
-        Tour tour = tourRepository.findBySlug(slug)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
-
-        log.info("[tour-service] getTourDetail resolvedTourId={}, resolvedDepartureId={}, resolvedDestinationId={}",
-            tour.getId(), tour.getDepartureId(), tour.getDestinationId());
-
-        if (request != null && request.getTourId() != null && !Objects.equals(request.getTourId(), tour.getId())) {
-            log.warn("[tour-service] Ignoring tour_id mismatch for slug={}: headerTourId={}, resolvedTourId={}",
-                slug, request.getTourId(), tour.getId());
+        Tour tour;
+        if (tourId != null) {
+            tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found"));
+            if (slug != null && !slug.equals(tour.getSlug())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slug does not match tour_id");
+            }
+        } else {
+            tour = tourRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tour not found: " + slug));
         }
 
-        List<TourScheduleResponse> schedules = tourScheduleRepository.findByTourSlugOrderByStartDateAsc(slug)
+        UUID queryTourId = tour.getId();
+
+        log.info("[tour-service] getTourDetail resolvedTourId={}, resolvedSlug={}, resolvedDepartureId={}, resolvedDestinationId={}",
+            tour.getId(), tour.getSlug(), tour.getDepartureId(), tour.getDestinationId());
+
+        List<TourScheduleResponse> schedules = tourScheduleRepository.findByTourIdOrderByStartDateAsc(queryTourId)
             .stream()
             .map(this::mapSchedule)
             .toList();
 
-        List<TourItineraryResponse> itinerary = tourItineraryRepository.findByTourSlugOrderByDayNumberAsc(slug)
+        List<TourItineraryResponse> itinerary = tourItineraryRepository.findByTourIdOrderByDayNumberAsc(queryTourId)
             .stream()
             .map(this::mapItinerary)
             .toList();
