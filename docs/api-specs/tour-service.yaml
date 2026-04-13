@@ -1,0 +1,269 @@
+# ============================================
+# Tour Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Tour Service API
+  description: |
+    API specification for Tour Service.
+    Handles tour search with filtering and tour detail retrieval including schedules and itineraries.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8082
+    description: Local development
+  - url: http://tour-service:8082
+    description: Docker Compose network
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/v1/tours:
+    get:
+      summary: Tìm kiếm tour
+      operationId: searchTours
+      tags:
+        - Tour
+      description: Tìm kiếm tour với nhiều tiêu chí lọc (từ khóa, điểm khởi hành, ngày, thời lượng, giá)
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: Từ khóa tìm kiếm (tên tour)
+          schema:
+            type: string
+            example: "Đà Nẵng"
+        - name: departures
+          in: query
+          required: false
+          description: Điểm khởi hành
+          schema:
+            type: string
+            example: "Hà Nội"
+        - name: start_date
+          in: query
+          required: false
+          description: Ngày khởi hành (ISO date)
+          schema:
+            type: string
+            format: date
+            example: "2026-05-01"
+        - name: duration_days
+          in: query
+          required: false
+          description: Số ngày tour
+          schema:
+            type: integer
+            example: 3
+        - name: min_price
+          in: query
+          required: false
+          description: Giá tối thiểu
+          schema:
+            type: number
+            format: decimal
+            example: 1000000
+        - name: max_price
+          in: query
+          required: false
+          description: Giá tối đa
+          schema:
+            type: number
+            format: decimal
+            example: 10000000
+      responses:
+        '200':
+          description: Danh sách tour tìm được
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OK
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TourSearchResponse'
+
+  /api/v1/tours/{slug}:
+    get:
+      summary: Xem chi tiết tour
+      operationId: getTourDetail
+      tags:
+        - Tour
+      description: Lấy thông tin chi tiết tour bao gồm mô tả, lịch trình ngày (itinerary), và các đợt khởi hành (schedule)
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: URL-friendly slug của tour
+          schema:
+            type: string
+            example: "tour-da-nang-hoi-an-3n2d"
+        - name: X-Tour-Id
+          in: header
+          required: false
+          description: UUID của tour (optional, dùng nếu có sẵn)
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Chi tiết tour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OK
+                  data:
+                    $ref: '#/components/schemas/TourDetailResponse'
+        '404':
+          description: Tour không tìm thấy
+
+components:
+  schemas:
+    TourSearchResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          example: "tour-da-nang-hoi-an-3n2d"
+        name:
+          type: string
+          example: "Tour Đà Nẵng - Hội An 3N2Đ"
+        description:
+          type: string
+        basePrice:
+          type: number
+          format: decimal
+          example: 2990000
+        durationDays:
+          type: integer
+          example: 3
+        durationNights:
+          type: integer
+          example: 2
+        status:
+          type: string
+          example: ACTIVE
+        averageRating:
+          type: number
+          format: decimal
+          example: 4.5
+        reviewCount:
+          type: integer
+          example: 120
+
+    TourDetailResponse:
+      type: object
+      properties:
+        tour:
+          $ref: '#/components/schemas/TourResponse'
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/TourScheduleResponse'
+        itineraries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TourItineraryResponse'
+
+    TourResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        basePrice:
+          type: number
+          format: decimal
+        durationDays:
+          type: integer
+        durationNights:
+          type: integer
+        status:
+          type: string
+        averageRating:
+          type: number
+          format: decimal
+        reviewCount:
+          type: integer
+
+    TourScheduleResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tourId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          example: "SCH-2026-05-01"
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        price:
+          type: number
+          format: decimal
+        maxParticipants:
+          type: integer
+        minParticipants:
+          type: integer
+        status:
+          type: string
+          example: AVAILABLE
+
+    TourItineraryResponse:
+      type: object
+      properties:
+        dayNumber:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Hà Nội - Đà Nẵng"
+        description:
+          type: string
+          example: "Đón tại sân bay, check-in khách sạn, tham quan cầu Rồng"

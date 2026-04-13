@@ -1,0 +1,243 @@
+# ============================================
+# Account Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Account Service API
+  description: |
+    API specification for Account Service.
+    Handles user registration, authentication (JWT), token refresh, and account info retrieval.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081
+    description: Local development
+  - url: http://account-service:8081
+    description: Docker Compose network
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/v1/auth/log-in:
+    post:
+      summary: Đăng nhập
+      operationId: login
+      tags:
+        - Authentication
+      description: Xác thực tài khoản và trả về JWT access/refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Đăng nhập thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_AccountResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '401':
+          description: Sai username hoặc password
+
+  /api/v1/auth/sign-up:
+    post:
+      summary: Đăng ký tài khoản
+      operationId: signUp
+      tags:
+        - Authentication
+      description: Tạo tài khoản mới
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '200':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_AccountResponse'
+        '400':
+          description: Dữ liệu không hợp lệ
+        '409':
+          description: Username hoặc email đã tồn tại
+
+  /api/v1/auth/refresh:
+    post:
+      summary: Làm mới token
+      operationId: refreshToken
+      tags:
+        - Authentication
+      description: Cấp lại access token từ refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Cấp token mới thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_TokenResponse'
+        '401':
+          description: Refresh token không hợp lệ hoặc đã hết hạn
+
+  /api/v1/accounts/{accountId}:
+    get:
+      summary: Lấy thông tin tài khoản
+      operationId: getAccountInfo
+      tags:
+        - Account
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lấy thông tin tài khoản thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_AccountResponse'
+        '404':
+          description: Tài khoản không tồn tại
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: nguyenvana
+        password:
+          type: string
+          format: password
+          example: "123456"
+
+    SignUpRequest:
+      type: object
+      required:
+        - username
+        - password
+        - fullName
+        - email
+      properties:
+        username:
+          type: string
+          example: nguyenvana
+        password:
+          type: string
+          format: password
+          example: "123456"
+        fullName:
+          type: string
+          example: Nguyễn Văn A
+        email:
+          type: string
+          format: email
+          example: nguyenvana@gmail.com
+        phoneNumber:
+          type: string
+          example: "0912345678"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1995-01-15"
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiJ9...
+
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        role:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+
+    ApiResponse_AccountResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Đăng nhập thành công
+        result:
+          $ref: '#/components/schemas/AccountResponse'
+
+    ApiResponse_TokenResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: Cấp token mới thành công
+        result:
+          $ref: '#/components/schemas/TokenResponse'

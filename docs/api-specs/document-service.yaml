@@ -1,0 +1,140 @@
+# ============================================
+# Document Service — OpenAPI 3.0 Specification
+# Docs: https://swagger.io/specification/
+# ============================================
+openapi: 3.0.3
+info:
+  title: Document Service API
+  description: |
+    API specification for Document Service.
+    Generates booking ticket PDFs from HTML templates using Flying Saucer renderer.
+    Supports both inline preview and file download.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8084
+    description: Local development
+  - url: http://document-service:8084
+    description: Docker Compose network
+
+paths:
+  /api/v1/documents/booking-tickets/show-ticket:
+    post:
+      summary: Render vé tour (inline preview)
+      operationId: renderTicketInline
+      tags:
+        - Booking Ticket
+      description: |
+        Tạo file PDF vé tour từ dữ liệu booking và trả về dạng inline (hiển thị trực tiếp trên trình duyệt).
+        Content-Disposition: inline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingTicketRequest'
+      responses:
+        '200':
+          description: PDF rendered thành công
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Dữ liệu không hợp lệ
+        '500':
+          description: Lỗi render PDF
+
+  /api/v1/documents/booking-tickets/file-pdf-ticket:
+    post:
+      summary: Tải vé tour PDF
+      operationId: downloadTicketPdf
+      tags:
+        - Booking Ticket
+      description: |
+        Tạo file PDF vé tour và trả về dạng attachment (tải về máy).
+        Content-Disposition: attachment
+        Filename: Ve_Tour_{bookingId}.pdf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingTicketRequest'
+      responses:
+        '200':
+          description: PDF tạo thành công — tải về
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Dữ liệu không hợp lệ
+        '500':
+          description: Lỗi render PDF
+
+components:
+  schemas:
+    BookingTicketRequest:
+      type: object
+      required:
+        - bookingId
+        - accountId
+        - tourScheduleId
+      properties:
+        bookingId:
+          type: string
+          description: Mã đơn đặt tour (dùng làm mã vé)
+          example: "BK-20260501-001"
+        accountId:
+          type: string
+          format: uuid
+          description: ID tài khoản khách hàng
+        tourScheduleId:
+          type: string
+          format: uuid
+          description: ID lịch khởi hành
+        tourName:
+          type: string
+          example: "Tour Đà Nẵng - Hội An 3N2Đ"
+        quantity:
+          type: integer
+          example: 2
+        confirmedSlots:
+          type: integer
+          description: Số chỗ đã xác nhận trong hệ thống tồn kho
+          example: 2
+        totalPrice:
+          type: integer
+          format: int64
+          example: 5990000
+        passengers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassengerResponse'
+        optionalServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingOptionalServiceResponse'
+
+    PassengerResponse:
+      type: object
+      properties:
+        fullName:
+          type: string
+          example: "Nguyễn Văn A"
+
+    BookingOptionalServiceResponse:
+      type: object
+      properties:
+        serviceName:
+          type: string
+          example: "Bảo hiểm du lịch"
+        quantity:
+          type: integer
+          example: 2
+        priceType:
+          type: string
+          example: "PER_PERSON"
