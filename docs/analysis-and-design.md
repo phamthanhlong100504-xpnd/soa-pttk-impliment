@@ -23,7 +23,7 @@ Describe or diagram the high-level Business Process to be automated.
 
 **Process Diagram:**
 
-[asset\process-diagram.png](asset\process-diagram.png)
+[asset\process-diagram.png](asset/process-diagram.png)
 
 ### 1.2 Existing Automation Systems
 
@@ -147,7 +147,7 @@ Based on Non-Functional Requirements (1.3) and Processing Requirements, identify
 
 Interaction diagram showing how Service Candidates collaborate to fulfill the business process.
 
-[asset\bussiness-process-diagram.png](asset\bussiness-process-diagram.png)
+[asset\bussiness-process-diagram.png](asset/bussiness-process-diagram.png)
 
 ---
 
@@ -223,16 +223,16 @@ Internal processing flow for each service.
 
 **Account Service — Login Flow:**
 
-[asset\login-flow.png](asset\login-flow.png)
+[asset\login-flow.png](asset/login-flow.png)
 
 **Booking-Tour Service — Temporal Workflow (Saga Pattern):**
 
-[asset\booking-tour-flow.png](asset\booking-tour-flow.png)
+[asset\booking-tour-flow.png](asset/booking-tour-flow.png)
 
 **Inventory Service — Slot Block Flow:**
 
-[asset\slot-block-flow.png](asset\slot-block-flow.png)
+[asset\slot-block-flow.png](asset/slot-block-flow.png)
 
 **Tour Service — Search Flow:**
 
-[asset\search-tour-flow.png](asset\search-tour-flow.png)
+[asset\search-tour-flow.png](asset/search-tour-flow.png)
