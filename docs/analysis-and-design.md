@@ -23,25 +23,7 @@ Describe or diagram the high-level Business Process to be automated.
 
 **Process Diagram:**
 
-```mermaid
-flowchart TD
-    A[Khách hàng truy cập website] --> B[Tìm kiếm / Lọc tour]
-    B --> C[Xem chi tiết tour & lịch trình]
-    C --> D{Đăng nhập?}
-    D -->|Chưa| E[Đăng nhập / Đăng ký tài khoản]
-    E --> D
-    D -->|Rồi| F[Chọn lịch khởi hành & nhập thông tin hành khách]
-    F --> G[Hệ thống giữ chỗ tạm thời - Slot Block]
-    G --> H[Tạo đơn đặt tour - Booking]
-    H --> I[Thanh toán qua PayOS]
-    I --> J{Thanh toán thành công?}
-    J -->|Không| K[Hủy giữ chỗ & Hủy đơn]
-    J -->|Có| L[Xác nhận đặt tour]
-    L --> M[Cập nhật tồn kho - Confirm Slot]
-    M --> N[Tạo vé PDF]
-    N --> O[Gửi email xác nhận kèm vé]
-    O --> P[Hoàn tất]
-```
+[asset\process-diagram.png](asset\process-diagram.png)
 
 ### 1.2 Existing Automation Systems
 
@@ -120,7 +102,7 @@ Map entities/processes to REST URI Resources.
 | Tour (search & detail) | `/api/v1/tours`, `/api/v1/tours/{slug}` |
 | Inventory (available slots) | `/api/v1/inventory/{tour-schedule-id}` |
 | Slot Block | `/api/v1/inventory/slot-blocks` |
-| Booking | `/api/v1/bookings`, `/api/v1/bookings?id={id}` |
+| Booking | `/api/v1/bookings`, `/api/v1/bookings/{bookingId}` |
 | Booking Confirm | `/api/v1/bookings/confirm` |
 | Payment Webhook | `/api/v1/payments/webhook` |
 | Booking Tour (Orchestration) | `/api/v1/booking-tour/booking`, `/api/v1/booking-tour/status/{idempotencyKey}` |
@@ -142,7 +124,7 @@ Map entities/processes to REST URI Resources.
 | Inventory Service | Cập nhật slot block | `/api/v1/inventory/slots-blocks` | PUT |
 | Booking Service | Tạo booking | `/api/v1/bookings` | POST |
 | Booking Service | Xác nhận booking | `/api/v1/bookings/confirm` | POST |
-| Booking Service | Lấy booking | `/api/v1/bookings?id={id}` | GET |
+| Booking Service | Lấy booking | `/api/v1/bookings/{bookingId}` | GET |
 | Booking Service | Xử lý payment webhook | `/api/v1/payments/webhook` | POST |
 | Booking-Tour Service | Khởi tạo workflow đặt tour | `/api/v1/booking-tour/booking` | POST |
 | Booking-Tour Service | Kiểm tra trạng thái workflow | `/api/v1/booking-tour/status/{key}` | GET |
@@ -165,48 +147,7 @@ Based on Non-Functional Requirements (1.3) and Processing Requirements, identify
 
 Interaction diagram showing how Service Candidates collaborate to fulfill the business process.
 
-```mermaid
-sequenceDiagram
-    participant Client as Frontend
-    participant GW as Kong API Gateway
-    participant BTS as Booking-Tour Service<br/>(Temporal Orchestrator)
-    participant IS as Inventory Service
-    participant BS as Booking Service
-    participant PS as Payment (PayOS)
-    participant DS as Document Service
-    participant NS as Notification Service
-
-    Client->>GW: POST /api/v1/booking-tour/booking
-    GW->>BTS: Forward request
-
-    Note over BTS: Temporal Workflow bắt đầu
-
-    BTS->>IS: GET /inventory/{scheduleId} — Validate available slots
-    IS-->>BTS: Available slots info
-
-    BTS->>BS: POST /bookings — Create booking (PENDING_PAYMENT)
-    BS-->>BTS: BookingResponse (id, code, totalPrice)
-
-    BTS->>IS: POST /inventory/slot-blocks — Block slots (PENDING)
-    IS-->>BTS: SlotBlockResponse (slotBlockId)
-
-    BTS->>BS: POST /payments/webhook — Simulate payment
-    BS-->>BTS: PaymentWebhookResponse (paymentId)
-
-    Note over BTS: Thanh toán thành công → Cập nhật
-
-    BTS->>BS: POST /bookings/confirm — Confirm booking (CONFIRMED)
-    BS-->>BTS: BookingResponse (CONFIRMED)
-
-    BTS->>IS: PUT /inventory/slots-blocks — Confirm slot block
-    IS-->>BTS: UpdateSlotBlockResponse (confirmedSlots)
-
-    BTS->>NS: POST /notifications/booking-tickets/send — Send confirmation email
-    NS-->>BTS: Email sent successfully
-
-    BTS-->>GW: Workflow completed
-    GW-->>Client: 200 OK — Đã nhận được yêu cầu đặt tour
-```
+[asset\bussiness-process-diagram.png](asset\bussiness-process-diagram.png)
 
 ---
 
@@ -244,7 +185,7 @@ Service Contract specification for each service. Full OpenAPI specs:
 | Endpoint | Method | Media Type | Response Codes |
 |----------|--------|------------|----------------|
 | `/api/v1/bookings` | POST | application/json | 200, 400 |
-| `/api/v1/bookings` | GET | application/json | 200, 404 |
+| `/api/v1/bookings{bookingId}` | GET | application/json | 200, 404 |
 | `/api/v1/bookings/confirm` | POST | application/json | 200, 400, 404 |
 | `/api/v1/payments/webhook` | POST | application/json | 200, 400 |
 
@@ -282,64 +223,16 @@ Internal processing flow for each service.
 
 **Account Service — Login Flow:**
 
-```mermaid
-flowchart TD
-    A[Receive POST /auth/log-in] --> B{Username & Password valid?}
-    B -->|Invalid format| C[Return 400 Bad Request]
-    B -->|Valid format| D[Query DB by username]
-    D --> E{Account exists?}
-    E -->|No| F[Return 401 - Tài khoản không tồn tại]
-    E -->|Yes| G{BCrypt password match?}
-    G -->|No| H[Return 401 - Sai mật khẩu]
-    G -->|Yes| I[Generate JWT Access + Refresh Token]
-    I --> J[Return 200 - AccountResponse with tokens]
-```
+[asset\login-flow.png](asset\login-flow.png)
 
 **Booking-Tour Service — Temporal Workflow (Saga Pattern):**
 
-```mermaid
-flowchart TD
-    A[Nhận CreateBookingRequest] --> B[Activity: Validate Tour Schedule]
-    B --> C{Còn chỗ?}
-    C -->|Không| D[Throw Exception → Saga Compensate]
-    C -->|Có| E[Activity: Create Booking - PENDING_PAYMENT]
-    E --> F[Activity: Block Inventory Slot - PENDING]
-    F --> G[Activity: Process Payment via PayOS]
-    G --> H{Payment OK?}
-    H -->|Không| I[Saga Compensate → Rollback]
-    H -->|Có| J[Activity: Confirm Booking - CONFIRMED]
-    J --> K[Activity: Update Slot Block - CONFIRMED]
-    K --> L[Activity: Send Email Notification]
-    L --> M[Workflow Complete]
-
-    style D fill:#f66,color:#fff
-    style I fill:#f66,color:#fff
-    style M fill:#6c6,color:#fff
-```
+[asset\booking-tour-flow.png](asset\booking-tour-flow.png)
 
 **Inventory Service — Slot Block Flow:**
 
-```mermaid
-flowchart TD
-    A[Receive POST /slot-blocks] --> B{Tour Schedule exists?}
-    B -->|No| C[Return 400 Error]
-    B -->|Yes| D{Available slots >= requested amount?}
-    D -->|No| E[Return 409 - Overbooking prevented]
-    D -->|Yes| F[Optimistic Lock: Decrement available_slots]
-    F --> G[Create SlotBlock entity - status PENDING]
-    G --> H[Set expires_at = now + 15 min]
-    H --> I[Return SlotBlockResponse]
-
-    J[Scheduled Job] --> K[Query PENDING blocks where expires_at < now]
-    K --> L[Mark as EXPIRED & restore available_slots]
-```
+[asset\slot-block-flow.png](asset\slot-block-flow.png)
 
 **Tour Service — Search Flow:**
 
-```mermaid
-flowchart TD
-    A[Receive GET /tours?q=...&departures=...&...] --> B[Build dynamic query]
-    B --> C[Query DB with filters: name LIKE, departure, date, duration, price range]
-    C --> D[Map to TourSearchResponse list]
-    D --> E[Return 200 with tour list]
-```
+[asset\search-tour-flow.png](asset\search-tour-flow.png)
