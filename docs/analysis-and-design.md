@@ -59,8 +59,8 @@ Decompose the process from 1.1 into granular actions. Mark actions unsuitable fo
 | 9 | Thanh toán online | Khách hàng | Thanh toán qua PayOS, nhận webhook callback | ✅ |
 | 10 | Xác nhận đơn đặt tour | Hệ thống | Cập nhật booking sang CONFIRMED sau khi thanh toán thành công | ✅ |
 | 11 | Cập nhật tồn kho | Hệ thống | Chuyển slot block sang CONFIRMED, cập nhật confirmed_slots | ✅ |
-| 12 | Tạo vé PDF | Hệ thống | Render booking ticket thành file PDF từ HTML template | ✅ |
-| 13 | Gửi email xác nhận | Hệ thống | Gửi email chứa thông tin đặt tour và vé PDF cho khách | ✅ |
+| 12 | Gửi email xác nhận | Hệ thống | Gửi email chứa thông tin đặt tour | ✅ |
+| 13 | Tạo vé PDF | Hệ thống | Render booking ticket thành file PDF từ HTML template | ✅ |
 | 14 | Dọn dẹp slot hết hạn | Hệ thống | Scheduled job tự động giải phóng slot block đã EXPIRED | ✅ |
 | 15 | Quyết định chọn tour nào | Khách hàng | Khách tự quyết định chọn tour phù hợp — mang tính chủ quan | ❌ |
 
