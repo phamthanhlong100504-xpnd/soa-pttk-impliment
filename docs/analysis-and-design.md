@@ -54,8 +54,8 @@ Decompose the process from 1.1 into granular actions. Mark actions unsuitable fo
 | 4 | Đăng nhập | Khách hàng | Xác thực và nhận JWT access/refresh token | ✅ |
 | 5 | Làm mới token | Khách hàng | Cấp lại access token từ refresh token | ✅ |
 | 6 | Kiểm tra chỗ trống | Hệ thống | Kiểm tra số slot available của tour schedule | ✅ |
-| 7 | Giữ chỗ tạm thời | Hệ thống | Tạo slot block với TTL (PENDING) để ngăn overbooking | ✅ |
-| 8 | Tạo đơn đặt tour | Hệ thống | Lưu booking với trạng thái PENDING_PAYMENT, kèm passengers và optional services | ✅ |
+| 7 | Tạo đơn đặt tour | Hệ thống | Lưu booking với trạng thái PENDING_PAYMENT, kèm passengers và optional services | ✅ |
+| 8 | Giữ chỗ tạm thời | Hệ thống | Tạo slot block với TTL (PENDING) để ngăn overbooking | ✅ |
 | 9 | Thanh toán online | Khách hàng | Thanh toán qua PayOS, nhận webhook callback | ✅ |
 | 10 | Xác nhận đơn đặt tour | Hệ thống | Cập nhật booking sang CONFIRMED sau khi thanh toán thành công | ✅ |
 | 11 | Cập nhật tồn kho | Hệ thống | Chuyển slot block sang CONFIRMED, cập nhật confirmed_slots | ✅ |
