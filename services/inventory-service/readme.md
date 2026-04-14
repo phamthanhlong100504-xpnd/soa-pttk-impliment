@@ -59,6 +59,19 @@ curl -X POST http://localhost:8083/api/v1/inventory/slot-blocks \
 
 ## Data Models
 
+> Quan hệ chính:  `TourSchedule (1) -> (1) Inventory`, `TourSchedule (1) -> (N) SlotBlock`, `Inventory (1) -> (N) InventoryHistory`.
+
+### TourSchedule (`tour_schedules`)
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `id` | UUID | Primary key |
+| `tour_id` | UUID | FK → `tours.id` |
+| `code` | String | Mã lịch khởi hành (unique) |
+| `start_date` | Date | Ngày khởi hành |
+
+> `TourSchedule` là thực thể gốc của tồn kho theo từng lịch khởi hành; mỗi `tour_schedule` có đúng 1 dòng `inventory`.
+
 ### Inventory (`inventory`)
 
 | Field | Type | Mô tả |
@@ -84,6 +97,23 @@ curl -X POST http://localhost:8083/api/v1/inventory/slot-blocks \
 | `expires_at` | LocalDateTime | Thời gian hết hạn (PENDING → EXPIRED) |
 | `booking_id` | UUID | ID booking liên kết |
 | `created_at` | LocalDateTime | Thời điểm tạo |
+
+### InventoryHistory (`inventory_history`)
+
+| Field | Type | Mô tả |
+|-------|------|-------|
+| `id` | UUID | Primary key |
+| `tour_schedule_id` | UUID | FK → `inventory.tour_schedule_id` |
+| `action_type` | Enum | `BLOCK` / `CONFIRM` / `EXPIRE` / `CANCEL` |
+| `quantity_changed` | Integer | Số lượng thay đổi |
+| `previous_available_slots` | Integer | Số chỗ trống trước thay đổi |
+| `new_available_slots` | Integer | Số chỗ trống sau thay đổi |
+| `reference_id` | UUID | Tham chiếu booking/process id |
+| `actor` | String | Người/hệ thống thực hiện (`customerId`, `SYSTEM_JOB`) |
+| `note` | String | Ghi chú nghiệp vụ |
+| `created_at` | Instant | Thời điểm ghi nhận lịch sử |
+
+
 
 ---
 
