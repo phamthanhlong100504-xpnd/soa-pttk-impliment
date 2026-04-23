@@ -102,6 +102,24 @@ public class BookingService {
         return returnBookingResponse(booking);
     }
 
+    @Transactional
+    public BookingResponse cancelBooking(ConfirmBookingRequest cancelBookingRequest) {
+        log.info("[controller] --> [service] Cancel booking: {}", cancelBookingRequest.getBookingId());
+
+        BookingEntity booking = bookingRepository.findById(cancelBookingRequest.getBookingId())
+            .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXIST));
+
+        booking.setBookingStatus(BookingStatus.CANCELLED);
+        booking.setPaymentId(cancelBookingRequest.getPaymentId());
+        booking = bookingRepository.save(booking);
+
+        Map<String, Object> payload = objectMapper.convertValue(booking, Map.class);
+        saveOutboxEvent("Booking", booking.getId(), "CANCELLED_BOOKING", payload);
+
+        log.info("[controller] --> [service] Cancel booking {} successfully", booking.getId());
+        return returnBookingResponse(booking);
+    }
+
     @Transactional(readOnly = true)
     public BookingResponse getBookingById(UUID bookingId) {
         log.info("[controller] --> [service] Get booking: {}", bookingId);

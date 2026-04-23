@@ -27,4 +27,7 @@ public interface BookingClient {
 
     @PostMapping("api/v1/bookings/confirm")
     public ApiResponseCreate<BookingResponse> confirmBooking(@RequestBody ConfirmBookingRequest confirmBookingRequest);
+
+    @PostMapping("api/v1/bookings/cancel")
+    public ApiResponseCreate<BookingResponse> cancelBooking(@RequestBody ConfirmBookingRequest cancelBookingRequest);
 }

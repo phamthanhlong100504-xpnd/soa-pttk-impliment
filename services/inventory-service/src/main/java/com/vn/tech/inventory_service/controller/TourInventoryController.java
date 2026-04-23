@@ -54,6 +54,16 @@ public class TourInventoryController {
 
     }
 
+    @DeleteMapping("/slots-blocks")
+    public ApiResponse releaseSlotBlocks(@RequestBody UpdateSlotBlockRequest request) {
+        log.info("[Inventory Service] [TourInventoryController] Hoàn tác slot-blocks; tourScheduleId : {}, customerId : {}",
+            request.getTourScheduleId(), request.getCustomerId());
+
+        UpdateSlotBlockResponse response = tourInventoryService.releaseSlotBlock(request.getTourScheduleId(), request.getCustomerId(), request.getSlotBlockId());
+
+        return new SuccessResponse(response, "Success! Hoàn tác slot-blocks thành công");
+    }
+
 
 
 }

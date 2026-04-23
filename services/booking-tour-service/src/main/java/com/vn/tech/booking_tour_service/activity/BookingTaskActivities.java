@@ -38,5 +38,11 @@ public interface BookingTaskActivities {
     UpdateSlotBlockResponse updateInventory(UpdateSlotBlockRequest updateSlotBlockRequest);
 
     @ActivityMethod
+    UpdateSlotBlockResponse releaseInventory(UpdateSlotBlockRequest updateSlotBlockRequest);
+
+    @ActivityMethod
+    BookingResponse cancelBooking(ConfirmBookingRequest cancelBookingRequest);
+
+    @ActivityMethod
     void notification(EmailRequest request);
 }

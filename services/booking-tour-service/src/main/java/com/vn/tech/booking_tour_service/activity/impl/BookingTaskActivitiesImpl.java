@@ -141,6 +141,32 @@ public class BookingTaskActivitiesImpl implements BookingTaskActivities {
     }
 
     @Override
+    public UpdateSlotBlockResponse releaseInventory(UpdateSlotBlockRequest updateSlotBlockRequest) {
+        try {
+            ResponseEntity<ApiResponseUpdate.Payload> response = inventoryClient.releaseSlotsBlocks(updateSlotBlockRequest);
+            if (response == null || response.getBody() == null) {
+                throw new RuntimeException("Inventory Service không trả về dữ liệu (Response Body null).");
+            }
+            ApiResponseUpdate.Payload payload = response.getBody();
+            if (payload.getCode() != 200) {
+                throw new RuntimeException("Inventory từ chối hoàn tác. Lý do: " + payload.getMessage());
+            }
+            return objectMapper.convertValue(payload.getData(), UpdateSlotBlockResponse.class);
+        } catch (FeignException e) {
+            throw new RuntimeException("Saga Fail: Lỗi kết nối mạng tới Inventory.");
+        }
+    }
+
+    @Override
+    public BookingResponse cancelBooking(ConfirmBookingRequest cancelBookingRequest) {
+        ApiResponseCreate<BookingResponse> response = bookingClient.cancelBooking(cancelBookingRequest);
+        if (response == null || response.getResult() == null || response.getCode() != 200) {
+            throw new RuntimeException("Saga Fail: Không thể hủy booking.");
+        }
+        return response.getResult();
+    }
+
+    @Override
     public void notification(EmailRequest request){
          notificationClient.sendEmail(request);
     }

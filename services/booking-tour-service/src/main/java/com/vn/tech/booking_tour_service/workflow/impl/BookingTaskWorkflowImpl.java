@@ -115,8 +115,10 @@ public class BookingTaskWorkflowImpl implements BookingTaskWorkflow {
              log.info("create booking");
 
              BookingResponse bookingResponse = activities.createBooking(request);
-
-//            saga.addCompensation(activities::cancelBooking, bookingResponse.getId());
+             ConfirmBookingRequest cancelBookingRequest = new ConfirmBookingRequest();
+             cancelBookingRequest.setBookingId(bookingResponse.getId());
+             cancelBookingRequest.setPaymentId(null);
+             saga.addCompensation(activities::cancelBooking, cancelBookingRequest);
 
              log.info("create booking success");
 
@@ -129,6 +131,11 @@ public class BookingTaskWorkflowImpl implements BookingTaskWorkflow {
                  .amount(request.getQuantity())
                  .build();
              SlotBlockResponse slotResponse = activities.blockInventorySlot(slotReq);
+             saga.addCompensation(activities::releaseInventory, UpdateSlotBlockRequest.builder()
+                 .tourScheduleId(request.getTourScheduleId())
+                 .customerId(request.getAccountId().toString())
+                 .slotBlockId(slotResponse.getSlotBlockId())
+                 .build());
 
              log.info("block slot success");
 
@@ -173,10 +180,10 @@ public class BookingTaskWorkflowImpl implements BookingTaskWorkflow {
              emailRequest.setOptionalServices(bookingResponse.getOptionalServices());
              activities.notification(emailRequest);
 
-         } catch (TemporalFailure e) {
-             saga.compensate();
-             throw e;
-         }
-     }
+          } catch (Exception e) {
+              saga.compensate();
+              throw Workflow.wrap(e);
+          }
+      }
 
 }

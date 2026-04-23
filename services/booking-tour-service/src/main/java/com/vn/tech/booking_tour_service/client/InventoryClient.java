@@ -19,4 +19,7 @@ public interface InventoryClient {
     @PutMapping("api/v1/inventory/slots-blocks")
     public ResponseEntity<ApiResponseUpdate.Payload> updateSlotsBlocks(@RequestBody UpdateSlotBlockRequest request);
 
+    @DeleteMapping("api/v1/inventory/slots-blocks")
+    public ResponseEntity<ApiResponseUpdate.Payload> releaseSlotsBlocks(@RequestBody UpdateSlotBlockRequest request);
+
 }

@@ -196,6 +196,50 @@ public class TourInventoryServiceImpl implements TourInventoryService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UpdateSlotBlockResponse releaseSlotBlock(UUID tourScheduleId, String customerId, UUID slotBlockId) {
+        SlotBlock slotBlock = slotBlockRepository.findById(slotBlockId)
+            .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy slot block để hoàn tác."));
+
+        if (SlotBlock.SlotBlockStatus.CANCELLED.equals(slotBlock.getStatus())) {
+            return UpdateSlotBlockResponse.builder()
+                .actionType("ALREADY_CANCELLED")
+                .confirmedSlots(0)
+                .bookingId(slotBlock.getBookingId().toString())
+                .build();
+        }
+
+        Integer amount = slotBlock.getQuantity();
+        slotBlock.setStatus(SlotBlock.SlotBlockStatus.CANCELLED);
+        slotBlockRepository.save(slotBlock);
+
+        Inventory inventory = inventoryRepository.findById(tourScheduleId)
+            .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy kho vé cho Lịch trình: " + tourScheduleId));
+
+        inventory.setBlockedSlots(Math.max(0, inventory.getBlockedSlots() - amount));
+        inventory.setAvailableSlots(inventory.getTotalSlots() - inventory.getBlockedSlots() - inventory.getConfirmedSlots());
+        inventoryRepository.save(inventory);
+
+        InventoryHistory history = createInventoryHistory(
+            customerId,
+            tourScheduleId,
+            amount,
+            inventory.getAvailableSlots(),
+            inventory.getAvailableSlots() + amount
+        );
+        history.setActionType(InventoryHistory.ActionType.EXPIRE);
+        history.setNote("Hoàn tác giữ chỗ do Saga rollback");
+        history.setReferenceId(slotBlock.getBookingId());
+        inventoryHistoryRepository.save(history);
+
+        return UpdateSlotBlockResponse.builder()
+            .actionType("CANCELLED")
+            .confirmedSlots(0)
+            .bookingId(slotBlock.getBookingId().toString())
+            .build();
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public void releaseExpiredSlotBlock(UUID slotBlockId) {
 

@@ -45,4 +45,13 @@ public class BookingController {
             .build();
     }
 
+    @PostMapping("cancel")
+    public ApiResponse<BookingResponse> cancelBooking(@RequestBody ConfirmBookingRequest cancelBookingRequest) {
+        return ApiResponse.<BookingResponse>builder()
+            .code(200)
+            .message("Hủy Booking thành công")
+            .result(bookingService.cancelBooking(cancelBookingRequest))
+            .build();
+    }
+
 }
